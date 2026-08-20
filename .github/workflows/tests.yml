@@ -31,6 +31,12 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Prepare Environment
+        run: |
+          cp .env.example .env
+          sed -i 's/DB_CONNECTION=pgsql/DB_CONNECTION=sqlite/' .env
+          touch database/database.sqlite
+
       - name: Setup Application
         run: composer setup
 
