@@ -34,7 +34,7 @@ trait ProfileValidationRules
      */
     protected function nameRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['required', 'string', 'min:3', 'max:255', 'regex:/^[a-zA-Z\s.\']+$/'];
     }
 
     /**
@@ -48,6 +48,7 @@ trait ProfileValidationRules
             'required',
             'string',
             'email',
+            'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
             'max:255',
             $userId === null
                 ? Rule::unique(User::class)
@@ -112,6 +113,6 @@ trait ProfileValidationRules
      */
     protected function addressRules(): array
     {
-        return ['required', 'string', 'max:255'];
+        return ['required', 'string', 'min:10', 'max:255', 'regex:/^[a-zA-Z0-9\s,.\'-]+$/'];
     }
 }
