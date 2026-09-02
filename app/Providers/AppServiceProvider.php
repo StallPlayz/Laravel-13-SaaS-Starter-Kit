@@ -2,11 +2,16 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Models\Workspace;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use App\Http\Responses\LoginResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+    $this->app->singleton(LoginResponseContract::class, LoginResponse::class);
     }
 
     /**
@@ -24,6 +29,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Gate::define('manage-workspace', function (User $user, Workspace $workspace) {
+            return $user->hasWorkspaceRole($workspace, 'owner') || $user->hasWorkspaceRole($workspace, 'admin');
+        });
+
+        Gate::define('delete-workspace', function (User $user, Workspace $workspace) {
+            return $user->hasWorkspaceRole($workspace, 'owner');
+        });
+
+        Gate::define('view-workspace', function (User $user, Workspace $workspace) {
+            return $user->workspaces->contains($workspace);
+        });
     }
 
     /**
