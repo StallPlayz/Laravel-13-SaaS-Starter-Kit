@@ -8,13 +8,11 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import type { BreadcrumbItem as BreadcrumbItemType } from '@/types';
+import type { BreadcrumbItem as BreadcrumbType } from '@/types';
 
-type Props = {
-    breadcrumbs: BreadcrumbItemType[];
-};
-
-defineProps<Props>();
+defineProps<{
+    breadcrumbs: BreadcrumbType[];
+}>();
 </script>
 
 <template>
@@ -22,16 +20,16 @@ defineProps<Props>();
         <BreadcrumbList>
             <template v-for="(item, index) in breadcrumbs" :key="index">
                 <BreadcrumbItem>
-                    <template v-if="index === breadcrumbs.length - 1">
-                        <BreadcrumbPage>{{ item.title }}</BreadcrumbPage>
-                    </template>
-                    <template v-else>
-                        <BreadcrumbLink as-child>
-                            <Link :href="item.href">{{ item.title }}</Link>
-                        </BreadcrumbLink>
-                    </template>
+                    <BreadcrumbLink v-if="item.href" as-child>
+                        <Link :href="item.href">{{ item.title }}</Link>
+                    </BreadcrumbLink>
+                    
+                    <BreadcrumbPage v-else>
+                        {{ item.title }}
+                    </BreadcrumbPage>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator v-if="index !== breadcrumbs.length - 1" />
+                
+                <BreadcrumbSeparator v-if="index < breadcrumbs.length - 1" />
             </template>
         </BreadcrumbList>
     </Breadcrumb>

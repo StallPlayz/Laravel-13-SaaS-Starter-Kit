@@ -26,6 +26,10 @@ return new class extends Migration
             $table->string('address');
             $table->boolean('terms');
 
+            $table->string('stripe_id')->nullable()->index();
+            $table->enum('account_tier', ['free', 'pro', 'enterprise'])->default('free');
+            $table->integer('max_workspaces')->default(1);
+
             $table->text('two_factor_secret')->nullable();
             $table->text('two_factor_recovery_codes')->nullable();
             $table->timestamp('two_factor_confirmed_at')->nullable();

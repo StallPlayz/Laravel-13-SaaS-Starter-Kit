@@ -1,28 +1,46 @@
 <?php
 
 use App\Actions\Fortify\CreateNewUser;
+use App\Http\Controllers\Admin\PlatformAdminController;
+use App\Http\Controllers\WorkspaceController;
+use App\Http\Requests\Auth\RegisterRequest;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
-use App\Http\Requests\Auth\RegisterRequest;
-use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
-use Illuminate\Auth\Events\Registered;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Middleware\EnsureSuperAdmin;
 
 Route::inertia('/', 'Welcome')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::post('/workspaces/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
+
+    Route::get('/workspaces/create', [WorkspaceController::class, 'create'])->name('workspaces.create');
+    Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
+    Route::get('/workspaces/{workspace}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
+    Route::put('/workspaces/{workspace}', [WorkspaceController::class, 'update'])->name('workspaces.update');
 });
 
-route::post('/register', function (RegisterRequest $request, CreateNewUser $creator){
+Route::middleware(['auth', 'verified', EnsureSuperAdmin::class])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [PlatformAdminController::class, 'dashboard'])->name('dashboard');
+    });
+
+Route::post('/register', function (RegisterRequest $request, CreateNewUser $creator) {
     event(new Registered($user = $creator->create($request->all())));
     Auth::login($user);
+
     return app(RegisterResponse::class);
 })->middleware(['guest', HandlePrecognitiveRequests::class])->name('register.store');
 
-if (!function_exists('fetchGeoDbAll')) {
-    function fetchGeoDbAll($endpoint, $params = [], $cacheKey = null) {
+if (! function_exists('fetchGeoDbAll')) {
+    function fetchGeoDbAll($endpoint, $params = [], $cacheKey = null)
+    {
         if ($cacheKey && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -37,10 +55,10 @@ if (!function_exists('fetchGeoDbAll')) {
             try {
                 $response = Http::timeout(10)->withHeaders([
                     'x-rapidapi-key' => env('RAPIDAPI_KEY'),
-                    'x-rapidapi-host' => env('RAPIDAPI_HOST')
-                ])->get("https://wft-geo-db.p.rapidapi.com/v1/geo" . $endpoint, array_merge($params, [
+                    'x-rapidapi-host' => env('RAPIDAPI_HOST'),
+                ])->get('https://wft-geo-db.p.rapidapi.com/v1/geo'.$endpoint, array_merge($params, [
                     'limit' => $limit,
-                    'offset' => $offset
+                    'offset' => $offset,
                 ]));
 
                 if ($response->failed()) {
@@ -49,29 +67,29 @@ if (!function_exists('fetchGeoDbAll')) {
 
                 $json = $response->json();
                 $data = $json['data'] ?? [];
-                
+
                 if (empty($data)) {
                     break;
                 }
 
                 $allData = array_merge($allData, $data);
-                
+
                 $totalCount = $json['metadata']['totalCount'] ?? 0;
                 $offset += $limit;
                 $pageCount++;
 
                 if ($offset < $totalCount && $pageCount < $maxPages) {
-                    sleep(1); 
+                    sleep(1);
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 break;
             }
-            
+
         } while ($offset < $totalCount && $pageCount < $maxPages);
 
         $result = ['data' => $allData];
-        
-        if ($cacheKey && !empty($allData)) {
+
+        if ($cacheKey && ! empty($allData)) {
             Cache::put($cacheKey, $result, now()->addDays(30));
         }
 
@@ -90,13 +108,13 @@ Route::get('/api/geo/countries/{countryId}/regions', function ($countryId) {
 Route::get('/api/geo/cities', function () {
     $countryId = request('countryIds');
     $adminCode = request('adminCode');
-    
+
     return fetchGeoDbAll('/cities', [
         'countryIds' => $countryId,
         'adminCode' => $adminCode,
         'types' => 'CITY',
         'sort' => '-population',
-        'minPopulation' => 10000
+        'minPopulation' => 10000,
     ], "geo_cities_{$countryId}_{$adminCode}");
 });
 

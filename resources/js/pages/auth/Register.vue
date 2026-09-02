@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
 import { Form, Head } from '@inertiajs/vue3';
+import { ref, onMounted, watch } from 'vue';
+import Combobox from '@/components/Combobox.vue';
 import InputError from '@/components/InputError.vue';
 import PasswordInput from '@/components/PasswordInput.vue';
 import TextLink from '@/components/TextLink.vue';
-import Combobox from '@/components/Combobox.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { Checkbox } from '@/components/ui/checkbox';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
@@ -38,11 +38,21 @@ const cities = ref<{ value: string; label: string; id?: string }[]>([]);
 onMounted(async () => {
     try {
         const response = await fetch('/api/geo/countries');
-        if (!response.ok) throw new Error('Failed to fetch');
-        
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch');
+        }
+
         const data = await response.json();
+
         if (data && data.data) {
-            countries.value = data.data.map((item: any) => ({ value: item.name, label: item.name, id: item.code })).sort((a: any, b: any) => a.label.localeCompare(b.label));
+            countries.value = data.data
+                .map((item: any) => ({
+                    value: item.name,
+                    label: item.name,
+                    id: item.code,
+                }))
+                .sort((a: any, b: any) => a.label.localeCompare(b.label));
         }
     } catch (error) {
         console.error('Failed to fetch countries:', error);
@@ -56,18 +66,37 @@ watch(selectedCountry, async (newCountryName) => {
     provinces.value = [];
     cities.value = [];
 
-    if (!newCountryName) return;
+    if (!newCountryName) {
+        return;
+    }
 
-    const country = (countries.value as any[]).find(c => c.value === newCountryName);
-    if (!country) return;
+    const country = (countries.value as any[]).find(
+        (c) => c.value === newCountryName,
+    );
+
+    if (!country) {
+        return;
+    }
 
     try {
-        const response = await fetch(`/api/geo/countries/${country.id}/regions`);
-        if (!response.ok) throw new Error('Failed to fetch');
-        
+        const response = await fetch(
+            `/api/geo/countries/${country.id}/regions`,
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch');
+        }
+
         const data = await response.json();
+
         if (data && data.data) {
-            provinces.value = data.data.map((item: any) => ({ value: item.name, label: item.name, id: item.isoCode })).sort((a: any, b: any) => a.label.localeCompare(b.label));
+            provinces.value = data.data
+                .map((item: any) => ({
+                    value: item.name,
+                    label: item.name,
+                    id: item.isoCode,
+                }))
+                .sort((a: any, b: any) => a.label.localeCompare(b.label));
         }
     } catch (error) {
         console.error('Failed to fetch provinces:', error);
@@ -79,20 +108,40 @@ watch(selectedProvince, async (newProvinceName) => {
     selectedDistrict.value = '';
     cities.value = [];
 
-    if (!newProvinceName || !selectedCountry.value) return;
+    if (!newProvinceName || !selectedCountry.value) {
+        return;
+    }
 
-    const country = (countries.value as any[]).find(c => c.value === selectedCountry.value);
-    const province = (provinces.value as any[]).find(p => p.value === newProvinceName);
-    
-    if (!country || !province) return;
+    const country = (countries.value as any[]).find(
+        (c) => c.value === selectedCountry.value,
+    );
+    const province = (provinces.value as any[]).find(
+        (p) => p.value === newProvinceName,
+    );
+
+    if (!country || !province) {
+        return;
+    }
 
     try {
-        const response = await fetch(`/api/geo/cities?countryIds=${country.id}&adminCode=${province.id}`);
-        if (!response.ok) throw new Error('Failed to fetch');
-        
+        const response = await fetch(
+            `/api/geo/cities?countryIds=${country.id}&adminCode=${province.id}`,
+        );
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch');
+        }
+
         const data = await response.json();
+
         if (data && data.data) {
-            cities.value = data.data.map((item: any) => ({ value: item.name, label: item.name, id: item.id })).sort((a: any, b: any) => a.label.localeCompare(b.label));
+            cities.value = data.data
+                .map((item: any) => ({
+                    value: item.name,
+                    label: item.name,
+                    id: item.id,
+                }))
+                .sort((a: any, b: any) => a.label.localeCompare(b.label));
         }
     } catch (error) {
         console.error('Failed to fetch cities:', error);
@@ -112,7 +161,13 @@ const handleEnter = (validate: any, submit: any) => {
     if (step.value === 1) {
         nextStep(validate, ['name', 'email', 'phone_number']);
     } else if (step.value === 2) {
-        nextStep(validate, ['country', 'province', 'city', 'district', 'address']);
+        nextStep(validate, [
+            'country',
+            'province',
+            'city',
+            'district',
+            'address',
+        ]);
     } else if (step.value === 3) {
         submit();
     }
@@ -133,7 +188,10 @@ const validateTerms = (validate: any) => {
         novalidate
         class="flex flex-col gap-6"
     >
-        <div class="grid gap-6" @keydown.enter.prevent="handleEnter(validate, submit)">
+        <div
+            class="grid gap-6"
+            @keydown.enter.prevent="handleEnter(validate, submit)"
+        >
             <!-- Step 1 -->
             <div v-show="step === 1" class="grid gap-6">
                 <div class="grid gap-2">
@@ -185,19 +243,25 @@ const validateTerms = (validate: any) => {
                     <InputError :message="errors.phone_number" />
                 </div>
 
-                <div class="flex gap-4 mt-2">
+                <div class="mt-2 flex gap-4">
                     <Button
                         type="button"
                         class="w-full"
                         tabindex="4"
-                        @click="nextStep(validate, ['name', 'email', 'phone_number'])"
+                        @click="
+                            nextStep(validate, [
+                                'name',
+                                'email',
+                                'phone_number',
+                            ])
+                        "
                     >
                         Next
                     </Button>
                 </div>
             </div>
 
-                        <!-- Step 2 -->
+            <!-- Step 2 -->
             <div v-show="step === 2" class="grid gap-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="grid gap-2">
@@ -272,7 +336,7 @@ const validateTerms = (validate: any) => {
                     <InputError :message="errors.address" />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mt-2">
+                <div class="mt-2 grid grid-cols-2 gap-4">
                     <Button
                         type="button"
                         variant="outline"
@@ -286,7 +350,15 @@ const validateTerms = (validate: any) => {
                         type="button"
                         class="w-full"
                         tabindex="9"
-                        @click="nextStep(validate, ['country', 'province', 'city', 'district', 'address'])"
+                        @click="
+                            nextStep(validate, [
+                                'country',
+                                'province',
+                                'city',
+                                'district',
+                                'address',
+                            ])
+                        "
                     >
                         Next
                     </Button>
@@ -350,7 +422,7 @@ const validateTerms = (validate: any) => {
                     <InputError :message="errors.terms" />
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mt-2">
+                <div class="mt-2 grid grid-cols-2 gap-4">
                     <Button
                         type="button"
                         variant="outline"

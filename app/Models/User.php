@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
@@ -47,5 +48,45 @@ class User extends Authenticatable implements PasskeyUser
             'terms' => 'boolean',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * The workspaces that belong to the user.
+     */
+    public function workspaces(): BelongsToMany
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_user')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the user's role in the given workspace.
+     */
+    public function workspaceRole(Workspace $workspace): ?string
+    {
+        if ($this->id === $workspace->owner_id) {
+            return 'owner';
+        }
+
+        $workspaceUser = $this->workspaces()->where('workspace_id', $workspace->id)->first();
+
+        return $workspaceUser ? $workspaceUser->pivot->role : null;
+    }
+
+    /**
+     * Check if the user has a specific role in the given workspace.
+     */
+    public function hasWorkspaceRole(Workspace $workspace, string $role): bool
+    {
+        return $this->workspaceRole($workspace) === $role;
+    }
+
+    /**
+     * Check if the user has global platform administrator privileges.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->platform_role === 'super_admin';
     }
 }

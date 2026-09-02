@@ -10,8 +10,21 @@ export type User = {
     [key: string]: unknown;
 };
 
+export type Workspace = {
+    id: number;
+    name: string;
+    slug: string;
+    tier: string;
+    settings: any;
+    created_at: string;
+    updated_at: string;
+};
+
 export type Auth = {
     user: User;
+    activeWorkspace?: Workspace | null;
+    currentRole?: string | null;
+    availableWorkspaces?: Workspace[];
 };
 
 export type Passkey = {
