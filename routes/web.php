@@ -2,7 +2,11 @@
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Http\Controllers\Admin\PlatformAdminController;
+use App\Http\Controllers\PublicWorkspaceController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceInvitationController;
+use App\Http\Controllers\WorkspaceMemberController;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
@@ -10,9 +14,17 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
-use App\Http\Middleware\EnsureSuperAdmin;
 
 Route::inertia('/', 'Welcome')->name('home');
+
+Route::get('/invitations/{token}', [WorkspaceInvitationController::class, 'accept'])
+    ->name('invitations.accept');
+
+Route::middleware('guest')->group(function () {
+    Route::post('/invitations/{token}', [WorkspaceInvitationController::class, 'register'])
+        ->middleware([HandlePrecognitiveRequests::class])
+        ->name('invitations.register');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');
@@ -22,6 +34,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::get('/workspaces/{workspace}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
     Route::put('/workspaces/{workspace}', [WorkspaceController::class, 'update'])->name('workspaces.update');
+    Route::post('/workspaces/{workspace}/invitations', [WorkspaceInvitationController::class, 'store'])->name('workspaces.invitations.store');
+    Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
 });
 
 Route::middleware(['auth', 'verified', EnsureSuperAdmin::class])
@@ -119,3 +133,5 @@ Route::get('/api/geo/cities', function () {
 });
 
 require __DIR__.'/settings.php';
+
+Route::get('/{workspace:slug}', [PublicWorkspaceController::class, 'show'])->name('workspace.public');

@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 
 const form = useForm({
     name: '',
+    slug: '',
 });
 
 const submit = () => {
@@ -47,6 +48,19 @@ const submit = () => {
                                     placeholder="Acme Agency"
                                 />
                                 <InputError :message="form.errors.name" />
+                            </div>
+
+                            <div class="grid gap-2">
+                                <Label for="slug">Workspace URL</Label>
+                                <Input
+                                    id="slug"
+                                    v-model="form.slug"
+                                    type="text"
+                                    required
+                                    placeholder="acme-agency"
+                                />
+                                <p class="text-xs text-muted-foreground">This will be your public URL: /acme-agency</p>
+                                <InputError :message="form.errors.slug" />
                             </div>
 
                             <Button

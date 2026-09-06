@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Workspace;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class WorkspaceController extends Controller
@@ -36,6 +35,7 @@ class WorkspaceController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'alpha_dash', 'max:255', 'unique:workspaces,slug'],
         ]);
 
         $user = $request->user();
@@ -48,7 +48,7 @@ class WorkspaceController extends Controller
         $workspace = Workspace::create([
             'owner_id' => $user->id,
             'name' => $request->name,
-            'slug' => Str::slug($request->name).'-'.uniqid(),
+            'slug' => $request->slug,
             'tier' => 'free',
         ]);
 
@@ -78,10 +78,20 @@ class WorkspaceController extends Controller
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'slug' => ['required', 'string', 'alpha_dash', 'max:255', 'unique:workspaces,slug,'.$workspace->id],
+            'settings.description' => ['nullable', 'string', 'max:1000'],
+            'settings.theme_color' => ['nullable', 'string', 'regex:/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/'],
+            'settings.website_url' => ['nullable', 'url', 'max:255'],
         ]);
 
         $workspace->update([
             'name' => $request->name,
+            'slug' => $request->slug,
+            'settings' => [
+                'description' => $request->input('settings.description'),
+                'theme_color' => $request->input('settings.theme_color'),
+                'website_url' => $request->input('settings.website_url'),
+            ],
         ]);
 
         return back()->with('success', 'Workspace updated successfully.');

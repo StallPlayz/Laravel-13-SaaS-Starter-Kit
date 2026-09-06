@@ -35,7 +35,7 @@ class CreateNewUser implements CreatesNewUsers
             'city' => $input['city'],
             'district' => $input['district'],
             'address' => $input['address'],
-            'terms' => false,
+            'terms' => $input['terms'],
         ]);
     }
 }

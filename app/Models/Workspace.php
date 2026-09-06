@@ -37,4 +37,9 @@ class Workspace extends Model
             ->withPivot('role')
             ->withTimestamps();
     }
+
+    public function invitations()
+    {
+        return $this->hasMany(WorkspaceInvitation::class);
+    }
 }

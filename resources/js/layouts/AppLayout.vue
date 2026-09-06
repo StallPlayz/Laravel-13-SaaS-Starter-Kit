@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { toast } from 'vue-sonner';
+import { Toaster } from '@/components/ui/sonner';
 import OwnerSidebarLayout from '@/layouts/app/OwnerSidebarLayout.vue';
 import AdminSidebarLayout from '@/layouts/app/AdminSidebarLayout.vue';
 import MemberClientSidebarLayout from '@/layouts/app/MemberClientSidebarLayout.vue';
@@ -13,11 +15,24 @@ const { breadcrumbs = [] } = defineProps<{
 
 const page = usePage();
 
+watch(
+    () => page.props.flash as { success?: string; error?: string } | undefined,
+    (flash) => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    },
+    { deep: true, immediate: true }
+);
+
 const LayoutComponent = computed(() => {
     const user = page.props.auth?.user;
     const role = page.props.auth?.currentRole;
 
-    if (user?.platform_role === 'super_admin') {
+    if (user?.platform_role === 'super_admin' && !role) {
         return PlatformAdminLayout;
     }
 
@@ -39,4 +54,6 @@ const LayoutComponent = computed(() => {
     <component :is="LayoutComponent" :breadcrumbs="breadcrumbs">
         <slot />
     </component>
+    
+    <Toaster position="bottom-right" rich-colors />
 </template>

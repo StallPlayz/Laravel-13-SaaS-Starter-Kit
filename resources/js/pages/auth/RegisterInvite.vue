@@ -11,16 +11,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
-import axios from 'axios';
 
-defineProps<{
-    passwordRules: string;
+const props = defineProps<{
+    passwordRules?: string;
+    token: string;
+    invitation: {
+        email: string;
+        role: string;
+        workspace: {
+            name: string;
+        };
+    };
 }>();
 
 defineOptions({
     layout: {
-        title: 'Create an account',
-        description: 'Enter your details below to create your account',
+        title: 'Accept Invitation',
+        description: 'Enter your details below to accept your invitation and create your account',
     },
 });
 
@@ -37,7 +44,6 @@ const cities = ref<{ value: string; label: string; id?: string }[]>([]);
 
 const form = useForm({
     name: '',
-    email: '',
     phone_number: '',
     country: '',
     province: '',
@@ -119,7 +125,7 @@ watch(selectedProvince, async (newProvinceName) => {
 
 watch(selectedCity, (newCityName) => form.city = newCityName);
 
-type FormKeys = 'name' | 'email' | 'phone_number' | 'country' | 'province' | 'city' | 'district' | 'address' | 'password' | 'password_confirmation' | 'terms';
+type FormKeys = 'name' | 'phone_number' | 'country' | 'province' | 'city' | 'district' | 'address' | 'password' | 'password_confirmation' | 'terms';
 
 const validateField = async (field: FormKeys) => {
     const value = form[field];
@@ -132,38 +138,8 @@ const validateField = async (field: FormKeys) => {
             case 'name':
                 if (String(value).length < 3) {
                     error = 'Name must be at least 3 characters.';
-                } else if (!/^[a-zA-Z\s\.\,\'\-]+$/.test(String(value))) {
-                    error = 'Name contains invalid characters.';
-                }
-                break;
-
-            case 'email':
-                const email = String(value).trim();
-                if (!email.includes('@')) {
-                    error = 'Please enter a valid email address with an @ symbol.';
-                } else {
-                    const parts = email.split('@');
-                    if (parts.length < 2 || !parts[1]) {
-                        error = 'Please enter a valid email address with a domain.';
-                    } else {
-                        const domain = parts[1];
-                        if (!domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
-                            error = 'Please enter a valid email address with a valid domain (e.g., example.com).';
-                        } else {
-                            try {
-                                await axios.post('/register', { email: value }, {
-                                    headers: {
-                                        Precognition: true,
-                                        'Precognition-Validate-Only': 'email'
-                                    }
-                                });
-                            } catch (e: any) {
-                                if (e.response?.status === 422 && e.response.data.errors.email) {
-                                    error = e.response.data.errors.email[0];
-                                }
-                            }
-                        }
-                    }
+                } else if (!/^[a-zA-Z0-9\s\.\,\'\-]+$/.test(String(value))) {
+                    error = 'Name contains invalid characters. Only letters, numbers, spaces, and (.) (,) (\') (-) are allowed.';
                 }
                 break;
 
@@ -232,7 +208,7 @@ const nextStep = async (fields: FormKeys[]) => {
 };
 
 const handleEnter = () => {
-    if (step.value === 1) nextStep(['name', 'email', 'phone_number']);
+    if (step.value === 1) nextStep(['name', 'phone_number']);
     else if (step.value === 2) nextStep(['country', 'province', 'city', 'district', 'address']);
     else if (step.value === 3) submit();
 };
@@ -246,7 +222,7 @@ const submit = async () => {
         return;
     }
 
-    form.post(`/register`, {
+    form.post(`/invitations/${props.token}`, {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
 };
@@ -254,12 +230,16 @@ const submit = async () => {
 
 <template>
 
-    <Head title="Register" />
+    <Head title="Accept Invitation" />
 
     <form @submit.prevent="submit" novalidate class="flex flex-col gap-6">
         <div class="grid gap-6" @keydown.enter.prevent="handleEnter">
 
-            <!-- Step 1 -->
+            <div class="mb-2 text-center text-sm text-muted-foreground">
+                You are joining <strong>{{ invitation.workspace.name }}</strong> as a <span class="capitalize">{{
+                    invitation.role }}</span>.
+            </div>
+
             <div v-show="step === 1" class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="name">Name</Label>
@@ -271,10 +251,9 @@ const submit = async () => {
 
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
-                    <Input id="email" type="email" v-model="form.email" required :tabindex="2" autocomplete="email"
-                        placeholder="email@example.com" @blur="validateField('email')"
-                        @input="debouncedValidate('email')" />
-                    <InputError :message="form.errors.email" />
+                    <Input id="email" type="email" :value="invitation.email" disabled :tabindex="2"
+                        class="bg-muted text-muted-foreground opacity-70 cursor-not-allowed" />
+                    <p class="text-xs text-muted-foreground">Locked to this invitation.</p>
                 </div>
 
                 <div class="grid gap-2">
@@ -286,14 +265,12 @@ const submit = async () => {
                 </div>
 
                 <div class="mt-2 flex gap-4">
-                    <Button type="button" class="w-full" tabindex="4"
-                        @click="nextStep(['name', 'email', 'phone_number'])">
+                    <Button type="button" class="w-full" tabindex="4" @click="nextStep(['name', 'phone_number'])">
                         Next
                     </Button>
                 </div>
             </div>
 
-            <!-- Step 2 -->
             <div v-show="step === 2" class="grid gap-6">
                 <div class="grid grid-cols-2 gap-4">
                     <div class="grid gap-2">
@@ -344,7 +321,6 @@ const submit = async () => {
                 </div>
             </div>
 
-            <!-- Step 3 -->
             <div v-show="step === 3" class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="password">Password</Label>
