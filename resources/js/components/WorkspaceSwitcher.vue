@@ -72,13 +72,15 @@ const switchWorkspace = (workspaceId: number) => {
                     <DropdownMenuLabel class="text-xs text-muted-foreground">
                         Workspaces
                     </DropdownMenuLabel>
-                    
+
                     <DropdownMenuItem as-child>
                         <Link
                             :href="`/workspaces/${activeWorkspace?.id}/settings`"
                             class="flex w-full cursor-pointer items-center gap-2 p-2"
                         >
-                            <div class="flex size-6 items-center justify-center rounded-md border bg-background">
+                            <div
+                                class="flex size-6 items-center justify-center rounded-md border bg-background"
+                            >
                                 <Settings class="size-4" />
                             </div>
                             <div class="font-medium text-muted-foreground">
@@ -88,12 +90,12 @@ const switchWorkspace = (workspaceId: number) => {
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
-                    
+
                     <DropdownMenuItem
                         v-for="workspace in availableWorkspaces"
                         :key="workspace.id"
                         @click="switchWorkspace(workspace.id)"
-                        class="gap-2 p-2 cursor-pointer"
+                        class="cursor-pointer gap-2 p-2"
                     >
                         <div
                             class="flex size-6 items-center justify-center rounded-sm border"
@@ -106,9 +108,9 @@ const switchWorkspace = (workspaceId: number) => {
                             class="ml-auto size-4"
                         />
                     </DropdownMenuItem>
-                    
+
                     <DropdownMenuSeparator />
-                    
+
                     <DropdownMenuItem as-child>
                         <Link
                             href="/workspaces/create"

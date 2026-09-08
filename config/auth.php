@@ -114,4 +114,16 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    'verification' => [
+        'expire' => 60, // minutes
+    ],
+
+    'otp' => [
+        'expire' => 5, // minutes
+    ],
+    
+    'invitation' => [
+        'expire' => 72, // hours
+    ],
+
 ];

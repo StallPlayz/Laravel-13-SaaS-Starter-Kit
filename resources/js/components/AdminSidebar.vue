@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { LayoutGrid, Briefcase, Receipt, Users, LifeBuoy, Headset } from '@lucide/vue';
+import {
+    LayoutGrid,
+    Briefcase,
+    Receipt,
+    Users,
+    LifeBuoy,
+    Headset,
+} from '@lucide/vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {

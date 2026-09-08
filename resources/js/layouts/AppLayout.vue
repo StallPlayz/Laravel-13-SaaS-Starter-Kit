@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import { Toaster } from '@/components/ui/sonner';
-import OwnerSidebarLayout from '@/layouts/app/OwnerSidebarLayout.vue';
 import AdminSidebarLayout from '@/layouts/app/AdminSidebarLayout.vue';
 import MemberClientSidebarLayout from '@/layouts/app/MemberClientSidebarLayout.vue';
+import OwnerSidebarLayout from '@/layouts/app/OwnerSidebarLayout.vue';
 import PlatformAdminLayout from '@/layouts/app/PlatformAdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
@@ -21,11 +21,12 @@ watch(
         if (flash?.success) {
             toast.success(flash.success);
         }
+
         if (flash?.error) {
             toast.error(flash.error);
         }
     },
-    { deep: true, immediate: true }
+    { deep: true, immediate: true },
 );
 
 const LayoutComponent = computed(() => {
@@ -54,6 +55,6 @@ const LayoutComponent = computed(() => {
     <component :is="LayoutComponent" :breadcrumbs="breadcrumbs">
         <slot />
     </component>
-    
+
     <Toaster position="bottom-right" rich-colors />
 </template>

@@ -20,9 +20,9 @@ const mainNavItems: NavItem[] = [
 
 <template>
     <Sidebar collapsible="icon" variant="inset" class="border-red-900/20">
-        <SidebarHeader class="p-4 border-b">
+        <SidebarHeader class="border-b p-4">
             <div class="flex items-center gap-2 font-bold text-red-600">
-                <Database class="w-5 h-5" />
+                <Database class="h-5 w-5" />
                 <span>SyncDesk Admin</span>
             </div>
         </SidebarHeader>

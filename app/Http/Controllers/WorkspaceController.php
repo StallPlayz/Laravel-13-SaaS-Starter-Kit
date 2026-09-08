@@ -3,18 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Workspace;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class WorkspaceController extends Controller
 {
-    public function switch(Request $request)
+    public function switch(Request $request): RedirectResponse
     {
         $request->validate([
             'workspace_id' => ['required', 'exists:workspaces,id'],
         ]);
 
+        /** @var Workspace $workspace */
         $workspace = Workspace::findOrFail($request->workspace_id);
 
         if (! Gate::allows('view-workspace', $workspace)) {
@@ -26,12 +29,12 @@ class WorkspaceController extends Controller
         return back();
     }
 
-    public function create()
+    public function create(): Response
     {
         return Inertia::render('workspaces/Create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -59,7 +62,7 @@ class WorkspaceController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function settings(Workspace $workspace)
+    public function settings(Workspace $workspace): Response
     {
         if (! Gate::allows('manage-workspace', $workspace)) {
             abort(403);
@@ -70,7 +73,7 @@ class WorkspaceController extends Controller
         ]);
     }
 
-    public function update(Request $request, Workspace $workspace)
+    public function update(Request $request, Workspace $workspace): RedirectResponse
     {
         if (! Gate::allows('manage-workspace', $workspace)) {
             abort(403);

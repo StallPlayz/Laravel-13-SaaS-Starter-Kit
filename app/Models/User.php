@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\{Fillable, Hidden, Casts};
+use Illuminate\Database\Eloquent\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,6 +14,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use App\Notifications\CustomVerifyEmail;
 
 /**
  * @property int $id
@@ -30,28 +31,21 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  */
 #[Fillable(['name', 'email', 'password', 'phone_number', 'country', 'province', 'city', 'district', 'address', 'terms'])]
 #[Hidden(['password', 'phone_number', 'address', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+#[Casts([
+    'email_verified_at' => 'datetime',
+    'password' => 'hashed',
+    'terms' => 'boolean',
+    'two_factor_confirmed_at' => 'datetime',
+])]
+class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'terms' => 'boolean',
-            'two_factor_confirmed_at' => 'datetime',
-        ];
-    }
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasCastsAttribute;
 
     /**
      * The workspaces that belong to the user.
+     *
+     * @return BelongsToMany<Workspace, $this>
      */
     public function workspaces(): BelongsToMany
     {
@@ -71,7 +65,10 @@ class User extends Authenticatable implements PasskeyUser
 
         $workspaceUser = $this->workspaces()->where('workspace_id', $workspace->id)->first();
 
-        return $workspaceUser ? $workspaceUser->pivot->role : null;
+        /** @var string|null $role */
+        $role = $workspaceUser?->pivot?->getAttribute('role');
+
+        return $role;
     }
 
     /**
@@ -88,5 +85,13 @@ class User extends Authenticatable implements PasskeyUser
     public function isSuperAdmin(): bool
     {
         return $this->platform_role === 'super_admin';
+    }
+
+    /**
+     * Override the default email verification notification.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new CustomVerifyEmail());
     }
 }

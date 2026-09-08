@@ -6,15 +6,19 @@ use App\Mail\WorkspaceInvite;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceInvitation;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
+use Inertia\Response;
 
 class WorkspaceInvitationController extends Controller
 {
-    public function store(Request $request, Workspace $workspace)
+    public function store(Request $request, Workspace $workspace): RedirectResponse
     {
         // Gate::authorize('invite', $workspace);
         $validated = $request->validate([
@@ -27,6 +31,7 @@ class WorkspaceInvitationController extends Controller
         }
 
         $token = Str::random(64);
+        $expiresIn = config('auth.invitation.expire', 72);
 
         $invitation = WorkspaceInvitation::updateOrCreate(
             [
@@ -36,52 +41,58 @@ class WorkspaceInvitationController extends Controller
             [
                 'role' => $validated['role'],
                 'token' => $token,
-                'expires_at' => now()->addHours(72),
+                'expires_at' => now()->addHours($expiresIn),
             ]
         );
 
         Mail::to($validated['email'])->send(
-            new WorkspaceInvite($invitation, $request->user()->name)
+            new WorkspaceInvite($invitation, $request->user()->name, $expiresIn)
         );
 
         return back()->with('success', 'Invitation sent successfully!');
     }
 
-    public function accept(Request $request, $token)
+    public function accept(Request $request, string $token): RedirectResponse|Response
     {
         $invitation = WorkspaceInvitation::with('workspace')->where('token', $token)->firstOrFail();
 
-        if ($invitation->expires_at->isPast()) {
+        /** @var Workspace $workspace */
+        $workspace = $invitation->workspace;
+
+        if (Carbon::parse($invitation->expires_at)->isPast()) {
             $invitation->delete();
             abort(403, 'This invitation has expired. Please request a new one.');
         }
 
+        $userExists = User::where('email', $invitation->email)->exists();
+
+
+
         if (Auth::check()) {
             $user = Auth::user();
 
-            if ($user->email !== $invitation->email) {
-                Auth::logout();
-
-                session(['pending_invitation_token' => $token]);
-
-                return redirect()->route('login')->withErrors([
-                    'email' => "This invitation is for {$invitation->email}. Please log in to that specific account to accept it.",
+            if ($user->email === $invitation->email) {
+                $invitation->workspace->users()->syncWithoutDetaching([
+                    $user->id => ['role' => $invitation->role],
                 ]);
+
+                $invitation->delete();
+
+                return redirect()->intended('/dashboard')->with('success', "You have successfully joined {$workspace->name}.");
             }
 
-            $invitation->workspace->users()->syncWithoutDetaching([
-                $user->id => ['role' => $invitation->role],
-            ]);
-
-            $invitation->delete();
-
-            return redirect()->intended('/dashboard')->with('success', "You have successfully joined {$invitation->workspace->name}.");
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
         }
 
-        if (User::where('email', $invitation->email)->exists()) {
-            session(['pending_invitation_token' => $token]);
+        session(['pending_invitation_token' => $token]);
 
-            return redirect()->route('login')->with('status', 'Please log in to accept your workspace invitation.');
+        if ($userExists) {
+            return inertia('auth/LoginInvite', [
+                'invitation' => $invitation,
+                'token' => $token,
+            ]);
         }
 
         return inertia('auth/RegisterInvite', [
@@ -90,11 +101,14 @@ class WorkspaceInvitationController extends Controller
         ]);
     }
 
-    public function register(Request $request, $token)
+    public function register(Request $request, string $token): RedirectResponse
     {
         $invitation = WorkspaceInvitation::where('token', $token)->firstOrFail();
 
-        if ($invitation->expires_at->isPast()) {
+        /** @var Workspace $workspace */
+        $workspace = $invitation->workspace;
+
+        if (Carbon::parse($invitation->expires_at)->isPast()) {
             $invitation->delete();
             abort(403, 'This invitation has expired.');
         }
@@ -124,7 +138,9 @@ class WorkspaceInvitationController extends Controller
             'terms' => $validated['terms'],
         ]);
 
-        $invitation->workspace->users()->attach($user->id, ['role' => $invitation->role]);
+        event(new Registered($user));
+
+        $workspace->users()->attach($user->id, ['role' => $invitation->role]);
 
         $invitation->delete();
 

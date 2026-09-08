@@ -23,56 +23,58 @@ const submit = () => {
 </script>
 
 <template>
-        <Head title="Create Workspace" />
+    <Head title="Create Workspace" />
 
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="mx-auto w-full max-w-md">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Create Workspace</CardTitle>
-                        <CardDescription>
-                            Create a new workspace to manage your agency and
-                            clients.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form @submit.prevent="submit" class="grid gap-4">
-                            <div class="grid gap-2">
-                                <Label for="name">Workspace Name</Label>
-                                <Input
-                                    id="name"
-                                    v-model="form.name"
-                                    type="text"
-                                    required
-                                    autofocus
-                                    placeholder="Acme Agency"
-                                />
-                                <InputError :message="form.errors.name" />
-                            </div>
+    <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div class="mx-auto w-full max-w-md">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Create Workspace</CardTitle>
+                    <CardDescription>
+                        Create a new workspace to manage your agency and
+                        clients.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form @submit.prevent="submit" class="grid gap-4">
+                        <div class="grid gap-2">
+                            <Label for="name">Workspace Name</Label>
+                            <Input
+                                id="name"
+                                v-model="form.name"
+                                type="text"
+                                required
+                                autofocus
+                                placeholder="Acme Agency"
+                            />
+                            <InputError :message="form.errors.name" />
+                        </div>
 
-                            <div class="grid gap-2">
-                                <Label for="slug">Workspace URL</Label>
-                                <Input
-                                    id="slug"
-                                    v-model="form.slug"
-                                    type="text"
-                                    required
-                                    placeholder="acme-agency"
-                                />
-                                <p class="text-xs text-muted-foreground">This will be your public URL: /acme-agency</p>
-                                <InputError :message="form.errors.slug" />
-                            </div>
+                        <div class="grid gap-2">
+                            <Label for="slug">Workspace URL</Label>
+                            <Input
+                                id="slug"
+                                v-model="form.slug"
+                                type="text"
+                                required
+                                placeholder="acme-agency"
+                            />
+                            <p class="text-xs text-muted-foreground">
+                                This will be your public URL: /acme-agency
+                            </p>
+                            <InputError :message="form.errors.slug" />
+                        </div>
 
-                            <Button
-                                type="submit"
-                                class="w-full"
-                                :disabled="form.processing"
-                            >
-                                Create Workspace
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
+                        <Button
+                            type="submit"
+                            class="w-full"
+                            :disabled="form.processing"
+                        >
+                            Create Workspace
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
+    </div>
 </template>

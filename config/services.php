@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'rapidapi' => [
+        'host' => env('RAPIDAPI_HOST'),
+        'key' => env('RAPIDAPI_KEY'),
+    ],
+
 ];

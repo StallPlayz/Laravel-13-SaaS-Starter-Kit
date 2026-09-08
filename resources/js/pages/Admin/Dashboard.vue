@@ -31,43 +31,63 @@ defineOptions({
 <template>
     <Head title="Super Admin Dashboard" />
     <div class="p-8">
-        <h1 class="text-3xl font-bold tracking-tight text-red-600 mb-6">Platform Overview</h1>
-        
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mb-8">
-            <div class="p-6 border rounded-xl bg-card text-card-foreground shadow-sm">
+        <h1 class="mb-6 text-3xl font-bold tracking-tight text-red-600">
+            Platform Overview
+        </h1>
+
+        <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div
+                class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm"
+            >
                 <div class="flex items-center gap-4">
-                    <Building2 class="w-8 h-8 text-muted-foreground" />
+                    <Building2 class="h-8 w-8 text-muted-foreground" />
                     <div>
-                        <p class="text-sm font-medium text-muted-foreground">Total Agencies</p>
-                        <p class="text-2xl font-bold">{{ stats.totalAgencies }}</p>
+                        <p class="text-sm font-medium text-muted-foreground">
+                            Total Agencies
+                        </p>
+                        <p class="text-2xl font-bold">
+                            {{ stats.totalAgencies }}
+                        </p>
                     </div>
                 </div>
             </div>
-            
-            <div class="p-6 border rounded-xl bg-card text-card-foreground shadow-sm">
+
+            <div
+                class="rounded-xl border bg-card p-6 text-card-foreground shadow-sm"
+            >
                 <div class="flex items-center gap-4">
-                    <Users class="w-8 h-8 text-muted-foreground" />
+                    <Users class="h-8 w-8 text-muted-foreground" />
                     <div>
-                        <p class="text-sm font-medium text-muted-foreground">Total Users</p>
+                        <p class="text-sm font-medium text-muted-foreground">
+                            Total Users
+                        </p>
                         <p class="text-2xl font-bold">{{ stats.totalUsers }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="border rounded-xl p-6 bg-card">
-            <h2 class="text-lg font-semibold mb-4">Recently Created Agencies</h2>
+        <div class="rounded-xl border bg-card p-6">
+            <h2 class="mb-4 text-lg font-semibold">
+                Recently Created Agencies
+            </h2>
             <div class="divide-y">
-                <div 
-                    v-for="agency in stats.recentAgencies" 
-                    :key="agency.id" 
-                    class="py-3 flex justify-between items-center text-sm"
+                <div
+                    v-for="agency in stats.recentAgencies"
+                    :key="agency.id"
+                    class="flex items-center justify-between py-3 text-sm"
                 >
                     <div>
                         <p class="font-medium">{{ agency.name }}</p>
-                        <p class="text-xs text-muted-foreground">Owner: {{ agency.owner?.name || 'N/A' }} ({{ agency.owner?.email }})</p>
+                        <p class="text-xs text-muted-foreground">
+                            Owner: {{ agency.owner?.name || 'N/A' }} ({{
+                                agency.owner?.email
+                            }})
+                        </p>
                     </div>
-                    <span class="text-xs text-muted-foreground">{{ new Date(agency.created_at).toLocaleDateString() }}</span>
+                    <span class="text-xs text-muted-foreground">{{
+                        new Date(agency.created_at).toLocaleDateString()
+                    }}</span>
                 </div>
             </div>
         </div>

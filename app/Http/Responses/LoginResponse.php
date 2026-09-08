@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use App\Models\WorkspaceInvitation;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,7 @@ class LoginResponse implements LoginResponseContract
             $token = $request->session()->get('pending_invitation_token');
             $invitation = WorkspaceInvitation::with('workspace')->where('token', $token)->first();
 
-            if ($invitation && ! $invitation->expires_at->isPast()) {
+            if ($invitation && ! Carbon::parse($invitation->expires_at)->isPast()) {
 
                 if ($invitation->email === $user->email) {
                     $request->session()->forget('pending_invitation_token');

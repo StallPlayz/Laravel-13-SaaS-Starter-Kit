@@ -1,15 +1,19 @@
 <x-mail::message>
-# You have been invited!
+# Workspace Invitation
 
-**{{ $inviterName }}** has invited you to join the **{{ $invitation->workspace->name }}** workspace as a {{ ucfirst($invitation->role) }}.
+Hello,
+
+**{{ $inviterName }}** has invited you to join the **{{ $invitation->workspace->name }}** workspace as a **{{ ucfirst($invitation->role) }}**.
 
 Click the button below to accept the invitation and set up your account.
 
-<x-mail::button :url="$acceptUrl">
+<x-mail::button :url="$acceptUrl" color="primary">
 Accept Invitation
 </x-mail::button>
 
-*This link will expire in 72 hours.*
+<x-mail::panel>
+**Note:** This invitation link is temporary and will safely expire in **{{ $expiresIn }} hours**.
+</x-mail::panel>
 
 If you did not expect this invitation, you can safely ignore this email.
 

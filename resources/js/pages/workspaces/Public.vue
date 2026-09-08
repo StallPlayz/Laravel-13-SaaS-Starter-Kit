@@ -15,18 +15,30 @@ const props = defineProps<{
     };
 }>();
 
-const themeColor = computed(() => props.workspace.settings?.theme_color || '#ffffff');
+const themeColor = computed(
+    () => props.workspace.settings?.theme_color || '#ffffff',
+);
 </script>
 
 <template>
     <Head :title="workspace.name" />
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-500" :style="{ backgroundColor: themeColor }">
-        <div class="max-w-md w-full text-center space-y-6 bg-background/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border">
+    <div
+        class="flex min-h-screen flex-col items-center justify-center p-4 transition-colors duration-500"
+        :style="{ backgroundColor: themeColor }"
+    >
+        <div
+            class="w-full max-w-md space-y-6 rounded-2xl border bg-background/80 p-8 text-center shadow-lg backdrop-blur-sm"
+        >
             <div class="space-y-4">
-                <h1 class="text-4xl font-bold tracking-tight">{{ workspace.name }}</h1>
-                
-                <p v-if="workspace.settings?.description" class="text-muted-foreground text-lg">
+                <h1 class="text-4xl font-bold tracking-tight">
+                    {{ workspace.name }}
+                </h1>
+
+                <p
+                    v-if="workspace.settings?.description"
+                    class="text-lg text-muted-foreground"
+                >
                     {{ workspace.settings.description }}
                 </p>
                 <p v-else class="text-muted-foreground">
@@ -34,15 +46,26 @@ const themeColor = computed(() => props.workspace.settings?.theme_color || '#fff
                 </p>
 
                 <div v-if="workspace.settings?.website_url" class="pt-2">
-                    <a :href="workspace.settings.website_url" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium">
+                    <a
+                        :href="workspace.settings.website_url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="font-medium text-primary hover:underline"
+                    >
                         Visit Website &rarr;
                     </a>
                 </div>
             </div>
-            
+
             <div class="pt-4">
-                <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
-                    {{ workspace.tier === 'pro' ? 'Pro Agency' : 'Standard Agency' }}
+                <div
+                    class="inline-flex items-center rounded-full border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                >
+                    {{
+                        workspace.tier === 'pro'
+                            ? 'Pro Agency'
+                            : 'Standard Agency'
+                    }}
                 </div>
             </div>
         </div>

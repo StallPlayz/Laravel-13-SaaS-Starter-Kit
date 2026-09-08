@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('workspace_invitations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
-            
+
             $table->string('email');
             $table->enum('role', ['owner', 'admin', 'member', 'client']);
             $table->string('token', 64)->unique();

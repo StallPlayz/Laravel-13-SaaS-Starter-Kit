@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Folder, CheckSquare, CreditCard, LifeBuoy, Headset } from '@lucide/vue';
+import {
+    LayoutGrid,
+    Folder,
+    CheckSquare,
+    CreditCard,
+    LifeBuoy,
+    Headset,
+} from '@lucide/vue';
+import { computed } from 'vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';

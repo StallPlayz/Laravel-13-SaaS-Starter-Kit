@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppContent from '@/components/AppContent.vue';
 import AppShell from '@/components/AppShell.vue';
-import PlatformAdminSidebar from '@/components/PlatformAdminSidebar.vue'; 
 import AppSidebarHeader from '@/components/AppSidebarHeader.vue';
+import PlatformAdminSidebar from '@/components/PlatformAdminSidebar.vue';
 import { Toaster } from '@/components/ui/sonner';
 import type { BreadcrumbItem } from '@/types';
 
@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <AppShell variant="sidebar">
-        <PlatformAdminSidebar /> 
+        <PlatformAdminSidebar />
         <AppContent variant="sidebar" class="overflow-x-hidden">
             <AppSidebarHeader :breadcrumbs="breadcrumbs" />
             <slot />

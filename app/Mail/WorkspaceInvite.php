@@ -15,7 +15,8 @@ class WorkspaceInvite extends Mailable
 
     public function __construct(
         public WorkspaceInvitation $invitation,
-        public string $inviterName
+        public string $inviterName,
+        public int $expiresIn
     ) {}
 
     public function envelope(): Envelope

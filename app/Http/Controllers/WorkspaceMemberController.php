@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Workspace;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class WorkspaceMemberController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): RedirectResponse|Response
     {
         $activeWorkspaceId = $request->session()->get('active_workspace_id');
 
@@ -16,6 +21,7 @@ class WorkspaceMemberController extends Controller
                 ->with('error', 'Please select a workspace to view its directory.');
         }
 
+        /** @var Workspace $workspace */
         $workspace = $request->user()->workspaces()
             ->where('workspaces.id', $activeWorkspaceId)
             ->firstOrFail();
@@ -26,11 +32,14 @@ class WorkspaceMemberController extends Controller
                 'name' => $workspace->name,
             ],
             'members' => $workspace->users->map(function ($user) {
+                /** @var Pivot $pivot */
+                $pivot = $user->getAttribute('pivot');
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'role' => $user->pivot->role,
+                    'role' => $pivot->getAttribute('role'),
                 ];
             }),
             'pendingInvitations' => $workspace->invitations->map(function ($invite) {
@@ -38,8 +47,8 @@ class WorkspaceMemberController extends Controller
                     'id' => $invite->id,
                     'email' => $invite->email,
                     'role' => $invite->role,
-                    'expires_at' => $invite->expires_at->diffForHumans(),
-                    'is_expired' => $invite->expires_at->isPast(),
+                    'expires_at' => Carbon::parse($invite->expires_at)->diffForHumans(),
+                    'is_expired' => Carbon::parse($invite->expires_at)->isPast(),
                 ];
             }),
         ]);

@@ -3,25 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Attributes\{Fillable, Casts};
+use Illuminate\Database\Eloquent\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable(['workspace_id', 'email', 'role', 'token', 'expires_at'])]
+#[Casts([
+    'expires_at' => 'datetime',
+])]
 class WorkspaceInvitation extends Model
 {
-    protected $fillable = [
-        'workspace_id',
-        'email',
-        'role',
-        'token',
-        'expires_at',
-    ];
+    use HasCastsAttribute;
 
-    protected function casts(): array
-    {
-        return [
-            'expires_at' => 'datetime',
-        ];
-    }
-
+    /** @return BelongsTo<Workspace, $this> */
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);

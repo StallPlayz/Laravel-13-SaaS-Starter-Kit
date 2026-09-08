@@ -23,12 +23,12 @@ defineProps<{
                     <BreadcrumbLink v-if="item.href" as-child>
                         <Link :href="item.href">{{ item.title }}</Link>
                     </BreadcrumbLink>
-                    
+
                     <BreadcrumbPage v-else>
                         {{ item.title }}
                     </BreadcrumbPage>
                 </BreadcrumbItem>
-                
+
                 <BreadcrumbSeparator v-if="index < breadcrumbs.length - 1" />
             </template>
         </BreadcrumbList>
