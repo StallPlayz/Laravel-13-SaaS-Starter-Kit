@@ -2,6 +2,7 @@
 
 use App\Actions\Fortify\CreateNewUser;
 use App\Http\Controllers\Admin\PlatformAdminController;
+use App\Http\Controllers\Admin\WorkspaceController as AdminWorkspaceController;
 use App\Http\Controllers\GeoController;
 use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\PublicWorkspaceController;
@@ -11,11 +12,14 @@ use App\Http\Controllers\WorkspaceMemberController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
-use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\SupportPinController;
+use App\Http\Controllers\Admin\SystemLogController as AdminLogController;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -32,6 +36,7 @@ Route::middleware('guest')->group(function () {
 
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
+
     return inertia('auth/VerifySuccess');
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
@@ -45,6 +50,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/workspaces/{workspace}', [WorkspaceController::class, 'update'])->name('workspaces.update');
     Route::post('/workspaces/{workspace}/invitations', [WorkspaceInvitationController::class, 'store'])->name('workspaces.invitations.store');
     Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
+    Route::post('/user/support-pin', [SupportPinController::class, 'store'])->name('user.support-pin.store');
+    Route::post('/admin/impersonation/leave', [AdminUserController::class, 'leaveImpersonation'])->name('admin.impersonation.leave');
 });
 
 Route::middleware(['auth', 'verified', EnsureSuperAdmin::class])
@@ -52,6 +59,14 @@ Route::middleware(['auth', 'verified', EnsureSuperAdmin::class])
     ->name('admin.')
     ->group(function () {
         Route::get('/', [PlatformAdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/workspaces', [AdminWorkspaceController::class, 'index'])->name('workspaces.index');
+        Route::patch('/workspaces/{workspace}/suspend', [AdminWorkspaceController::class, 'toggleSuspension'])->name('workspaces.suspend');
+        Route::post('/workspaces/{workspace}/ghost', [AdminWorkspaceController::class, 'enterGhostMode'])->name('workspaces.ghost.enter');
+        Route::post('/workspaces/ghost/exit', [AdminWorkspaceController::class, 'exitGhostMode'])->name('workspaces.ghost.exit');
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/impersonate', [AdminUserController::class, 'impersonate'])->name('users.impersonate');
+        Route::get('/logs', [AdminLogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/download/{date}', [AdminLogController::class, 'download'])->name('logs.download');
     });
 
 Route::post('/register', function (RegisterRequest $request, CreateNewUser $creator) {
@@ -71,6 +86,6 @@ Route::prefix('api/geo')->group(function () {
     Route::get('/cities', [GeoController::class, 'cities']);
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
 
 Route::get('/{workspace:slug}', [PublicWorkspaceController::class, 'show'])->name('workspace.public');

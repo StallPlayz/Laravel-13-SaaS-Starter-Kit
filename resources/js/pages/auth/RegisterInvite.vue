@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
+import debounce from 'lodash/debounce';
 
 const props = defineProps<{
     passwordRules?: string;
@@ -257,16 +258,16 @@ const handleSelection = async (field: FormKeys) => {
     validateField(field);
 };
 
-const timeouts: Record<string, ReturnType<typeof setTimeout>> = {};
+const debouncedValidators: Partial<Record<FormKeys, (...args: any[]) => void>> = {};
 
 const debouncedValidate = (field: FormKeys) => {
-    if (timeouts[field]) {
-        clearTimeout(timeouts[field]);
+    if (!debouncedValidators[field]) {
+        debouncedValidators[field] = debounce((f: FormKeys) => {
+            validateField(f);
+        }, 1000);
     }
-
-    timeouts[field] = setTimeout(() => {
-        validateField(field);
-    }, 1000);
+    
+    debouncedValidators[field]!(field);
 };
 
 const nextStep = async (fields: FormKeys[]) => {

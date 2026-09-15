@@ -121,7 +121,7 @@ return [
     'otp' => [
         'expire' => 5, // minutes
     ],
-    
+
     'invitation' => [
         'expire' => 72, // hours
     ],

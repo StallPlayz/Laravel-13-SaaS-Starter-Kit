@@ -1,22 +1,25 @@
 <script setup lang="ts">
 import { Form, Head } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
+import axios from 'axios';
+import { onMounted, onBeforeUnmount } from 'vue';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import Layout from '@/layouts/auth/AuthSimpleLayout.vue';
 import { logout } from '@/routes';
 import { send } from '@/routes/verification';
-import { onMounted, onBeforeUnmount } from 'vue';
-import { router } from '@inertiajs/vue3';
-import axios from 'axios';
-import Layout from '@/layouts/auth/AuthSimpleLayout.vue';
 
 defineOptions({
-    layout: (props: { email: string }) => [Layout, {
-        title: 'Email verification',
-        description: `Please verify your email address by clicking on the link we just emailed to `,
-        descriptionSuffix: props.email,
-    }],
-});   
+    layout: (props: { email: string }) => [
+        Layout,
+        {
+            title: 'Email verification',
+            description: `Please verify your email address by clicking on the link we just emailed to `,
+            descriptionSuffix: props.email,
+        },
+    ],
+});
 
 defineProps<{
     status?: string;
@@ -28,12 +31,16 @@ let pollInterval: ReturnType<typeof setInterval> | null = null;
 const checkVerificationStatus = async () => {
     try {
         const response = await axios.get('/api/user/verified-status');
+
         if (response.data.verified) {
-            if (pollInterval) clearInterval(pollInterval);
-            router.visit('/dashboard'); 
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+
+            router.visit('/dashboard');
         }
     } catch (error) {
-        console.error('Polling failed');
+        console.error('Polling failed', error);
     }
 };
 
@@ -42,13 +49,15 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-    if (pollInterval) clearInterval(pollInterval);
+    if (pollInterval) {
+        clearInterval(pollInterval);
+    }
 });
 </script>
 
 <template>
     <Head title="Email verification" />
-        
+
     <div
         v-if="status === 'verification-link-sent'"
         class="mb-4 text-center text-sm font-medium text-green-600"

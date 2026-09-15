@@ -6,13 +6,13 @@ use App\Mail\WorkspaceInvite;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceInvitation;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
 use Inertia\Response;
 
@@ -65,8 +65,6 @@ class WorkspaceInvitationController extends Controller
         }
 
         $userExists = User::where('email', $invitation->email)->exists();
-
-
 
         if (Auth::check()) {
             $user = Auth::user();
