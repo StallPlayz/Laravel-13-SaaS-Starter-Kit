@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\AuditLog;
 
 class ProfileController extends Controller
 {
@@ -19,9 +20,20 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        if ($request->user()->isSuperAdmin()) {
+            return Inertia::render('Admin/Profile/Edit', []);
+        }
+
+        $auditLogs = AuditLog::with('impersonator:id,name')
+            ->where('user_id', $request->user()->id)
+            ->latest()
+            ->take(50)
+            ->get();
+
         return Inertia::render('settings/Profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+            'status' => session('status'),
+            'auditLogs' => $auditLogs,
         ]);
     }
 

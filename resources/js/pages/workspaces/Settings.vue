@@ -11,11 +11,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useReadOnly } from '@/composables/useReadOnly';
 import type { Workspace } from '@/types';
 
 const props = defineProps<{
     workspace: Workspace;
 }>();
+
+const { isReadOnly } = useReadOnly();
 
 const form = useForm({
     name: props.workspace.name,
@@ -51,6 +54,7 @@ const submit = () => {
                             <Input
                                 id="name"
                                 v-model="form.name"
+                                :disabled="isReadOnly"
                                 type="text"
                                 required
                                 autofocus
@@ -63,6 +67,7 @@ const submit = () => {
                             <Input
                                 id="slug"
                                 v-model="form.slug"
+                                :disabled="isReadOnly"
                                 type="text"
                                 required
                             />
@@ -76,6 +81,7 @@ const submit = () => {
                             <Input
                                 id="description"
                                 v-model="form.settings.description"
+                                :disabled="isReadOnly"
                                 type="text"
                                 placeholder="We build awesome things."
                             />
@@ -89,6 +95,7 @@ const submit = () => {
                             <Input
                                 id="website_url"
                                 v-model="form.settings.website_url"
+                                :disabled="isReadOnly"
                                 type="url"
                                 placeholder="https://example.com"
                             />
@@ -103,11 +110,13 @@ const submit = () => {
                                 <input
                                     id="theme_color"
                                     v-model="form.settings.theme_color"
+                                    :disabled="isReadOnly"
                                     type="color"
                                     class="h-10 w-14 cursor-pointer rounded border bg-background p-1"
                                 />
                                 <Input
                                     v-model="form.settings.theme_color"
+                                    :disabled="isReadOnly"
                                     type="text"
                                     class="flex-1"
                                     placeholder="#ffffff"
@@ -120,7 +129,7 @@ const submit = () => {
                         <Button
                             type="submit"
                             class="w-full"
-                            :disabled="form.processing"
+                            :disabled="isReadOnly || form.processing"
                         >
                             Save Changes
                         </Button>

@@ -21,24 +21,32 @@ class WorkspaceMemberController extends Controller
                 ->with('error', 'Please select a workspace to view its directory.');
         }
 
-        /** @var Workspace $workspace */
-        $workspace = $request->user()->workspaces()
-            ->where('workspaces.id', $activeWorkspaceId)
-            ->firstOrFail();
+        $user = $request->user();
+        $isGhostMode = $request->session()->has('ghost_workspace_id');
+
+        if ($isGhostMode && $user->isSuperAdmin()) {
+            /** @var Workspace $workspace */
+            $workspace = Workspace::findOrFail($activeWorkspaceId);
+        } else {
+            /** @var Workspace $workspace */
+            $workspace = $user->workspaces()
+                ->where('workspaces.id', $activeWorkspaceId)
+                ->firstOrFail();
+        }
 
         return Inertia::render('workspaces/Directory', [
             'workspace' => [
                 'id' => $workspace->id,
                 'name' => $workspace->name,
             ],
-            'members' => $workspace->users->map(function ($user) {
+            'members' => $workspace->users->map(function ($workspaceUser) {
                 /** @var Pivot $pivot */
-                $pivot = $user->getAttribute('pivot');
+                $pivot = $workspaceUser->getAttribute('pivot');
 
                 return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
+                    'id' => $workspaceUser->id,
+                    'name' => $workspaceUser->name,
+                    'email' => $workspaceUser->email,
                     'role' => $pivot->getAttribute('role'),
                 ];
             }),

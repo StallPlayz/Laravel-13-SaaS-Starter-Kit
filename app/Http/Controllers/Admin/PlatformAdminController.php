@@ -12,7 +12,7 @@ class PlatformAdminController extends Controller
 {
     public function dashboard(): Response
     {
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('admin/Dashboard', [
             'stats' => [
                 'totalAgencies' => Workspace::count(),
                 'totalUsers' => User::count(),

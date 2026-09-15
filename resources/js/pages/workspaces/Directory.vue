@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
+import { useReadOnly } from '@/composables/useReadOnly';
 import { directory } from '@/routes';
 
 const props = defineProps<{
@@ -24,6 +25,8 @@ defineOptions({
         ],
     },
 });
+
+const { isReadOnly } = useReadOnly();
 
 const form = useForm({
     email: '',
@@ -67,6 +70,7 @@ const sendInvite = () => {
                         <input
                             id="email"
                             v-model="form.email"
+                            :disabled="isReadOnly"
                             type="email"
                             class="mt-1 block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                             placeholder="colleague@example.com"
@@ -89,6 +93,7 @@ const sendInvite = () => {
                         <select
                             id="role"
                             v-model="form.role"
+                            :disabled="isReadOnly"
                             class="mt-1 block w-full rounded-md border-input bg-background text-foreground shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
                         >
                             <option value="admin">Admin</option>
@@ -106,7 +111,7 @@ const sendInvite = () => {
                     <div class="mt-1 md:mt-6">
                         <button
                             type="submit"
-                            :disabled="form.processing"
+                            :disabled="isReadOnly || form.processing"
                             class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                         >
                             Send Invitation
