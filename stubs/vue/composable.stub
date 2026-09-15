@@ -1,0 +1,18 @@
+import { ref, computed } from 'vue';
+
+export function use{{ componentName }}() {
+    // State
+    const isReady = ref(false);
+
+    // Computed properties
+    
+    // Actions
+    const initialize = () => {
+        isReady.value = true;
+    };
+
+    return {
+        isReady,
+        initialize,
+    };
+}

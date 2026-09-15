@@ -1,0 +1,13 @@
+<script setup lang="ts">
+// 
+</script>
+
+<template>
+    <div class="min-h-screen bg-background text-foreground flex flex-col">
+        <!-- Header / Nav -->
+        
+        <main class="flex-1 p-4 md:p-6">
+            <slot />
+        </main>
+    </div>
+</template>

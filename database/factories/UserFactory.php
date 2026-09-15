@@ -2,67 +2,44 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
-/**
- * @extends Factory<User>
- */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
+        $locations = [
+            ['country' => 'Indonesia', 'province' => 'East Java', 'city' => 'Surabaya'],
+            ['country' => 'Indonesia', 'province' => 'Jakarta', 'city' => 'Central Jakarta'],
+            ['country' => 'Indonesia', 'province' => 'Bali', 'city' => 'Denpasar'],
+            ['country' => 'United States', 'province' => 'California', 'city' => 'Los Angeles'],
+            ['country' => 'United States', 'province' => 'New York', 'city' => 'New York City'],
+            ['country' => 'Japan', 'province' => 'Tokyo', 'city' => 'Tokyo'],
+            ['country' => 'Australia', 'province' => 'New South Wales', 'city' => 'Sydney'],
+        ];
+
+        $location = fake()->randomElement($locations);
+
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'phone_number' => fake()->phoneNumber(),
-            'country' => fake()->country(),
-            /** @phpstan-ignore-next-line */
-            'province' => fake()->state(),
-            'city' => fake()->city(),
-            'district' => fake()->citySuffix(),
+            'country' => $location['country'],
+            'province' => $location['province'],
+            'city' => $location['city'],
+            'district' => fake()->streetName(),
             'address' => fake()->streetAddress(),
             'terms' => true,
+            'account_tier' => fake()->randomElement(['free', 'pro', 'enterprise']),
+            'max_workspaces' => fake()->numberBetween(1, 5),
+            'platform_role' => 'user',
             'remember_token' => Str::random(10),
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
-            'two_factor_confirmed_at' => null,
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
-    }
-
-    /**
-     * Indicate that the model has two-factor authentication configured.
-     */
-    public function withTwoFactor(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'two_factor_secret' => encrypt('secret'),
-            'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
-            'two_factor_confirmed_at' => now(),
-        ]);
     }
 }
