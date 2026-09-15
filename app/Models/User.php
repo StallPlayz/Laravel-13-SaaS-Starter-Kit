@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\CustomVerifyEmail;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Eloquent\Attributes\{Fillable, Hidden, Casts};
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Attributes\Casts;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +17,6 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use App\Notifications\CustomVerifyEmail;
 
 /**
  * @property int $id
@@ -36,11 +38,12 @@ use App\Notifications\CustomVerifyEmail;
     'password' => 'hashed',
     'terms' => 'boolean',
     'two_factor_confirmed_at' => 'datetime',
+    'support_pin_expires_at' => 'datetime',
 ])]
-class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, HasCastsAttribute;
+    use HasCastsAttribute, HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * The workspaces that belong to the user.
@@ -92,6 +95,6 @@ class User extends Authenticatable implements PasskeyUser, MustVerifyEmail
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new CustomVerifyEmail());
+        $this->notify(new CustomVerifyEmail);
     }
 }

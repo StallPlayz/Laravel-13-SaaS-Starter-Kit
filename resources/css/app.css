@@ -166,7 +166,46 @@
     * {
         @apply border-border outline-ring/50;
     }
+
+    @supports (-moz-appearance: none) {
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) transparent;
+        }
+    }
+    
     body {
         @apply bg-background text-foreground;
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+        background: transparent !important;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: transparent !important;
+    }
+
+    ::-webkit-scrollbar-button {
+        display: none !important;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-border rounded-full transition-colors;
+        border: 2px solid transparent; 
+        background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-muted-foreground/60; 
+        border: 2px solid transparent;
+        background-clip: padding-box;
     }
 }

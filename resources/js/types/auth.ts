@@ -18,6 +18,7 @@ export type Workspace = {
     settings: any;
     created_at: string;
     updated_at: string;
+    is_suspended?: boolean;
 };
 
 export type Auth = {
@@ -25,6 +26,8 @@ export type Auth = {
     activeWorkspace?: Workspace | null;
     currentRole?: string | null;
     availableWorkspaces?: Workspace[];
+    isGhostMode?: boolean;
+    isImpersonating?: boolean;
 };
 
 export type Passkey = {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import {
     LayoutGrid,
     Briefcase,
@@ -8,6 +9,7 @@ import {
     LifeBuoy,
     Headset,
 } from '@lucide/vue';
+import { computed } from 'vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -19,13 +21,22 @@ import {
 import WorkspaceSwitcher from '@/components/WorkspaceSwitcher.vue';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
-    { title: 'Projects', href: '/projects', icon: Briefcase },
-    { title: 'Invoices', href: '/invoices', icon: Receipt },
-    { title: 'Directory', href: '/directory', icon: Users },
-    { title: 'Workspace Settings', href: '/settings', icon: Settings },
-];
+const page = usePage();
+
+const mainNavItems = computed<NavItem[]>(() => {
+    const workspace = page.props.auth.activeWorkspace;
+    const settingsUrl = workspace
+        ? `/workspaces/${workspace.id}/settings`
+        : '/dashboard';
+
+    return [
+        { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+        { title: 'Projects', href: '/projects', icon: Briefcase },
+        { title: 'Invoices', href: '/invoices', icon: Receipt },
+        { title: 'Directory', href: '/directory', icon: Users },
+        { title: 'Workspace Settings', href: settingsUrl, icon: Settings },
+    ];
+});
 
 const footerNavItems: NavItem[] = [
     { title: 'Help Center', href: '/help', icon: LifeBuoy },

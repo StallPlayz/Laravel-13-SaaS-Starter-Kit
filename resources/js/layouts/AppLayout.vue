@@ -56,5 +56,5 @@ const LayoutComponent = computed(() => {
         <slot />
     </component>
 
-    <Toaster position="bottom-right" rich-colors />
+    <Toaster position="top-center" rich-colors />
 </template>
