@@ -1,3 +1,5 @@
+import type { AxiosInstance } from 'axios';
+import type Echo from 'laravel-echo';
 import type { Auth } from '@/types/auth';
 
 // Extend ImportMeta interface for Vite...
@@ -29,5 +31,13 @@ declare module 'vue' {
         $inertia: typeof Router;
         $page: Page;
         $headManager: ReturnType<typeof createHeadManager>;
+    }
+}
+
+declare global {
+    interface Window {
+        Echo: Echo;
+        Pusher: any; 
+        axios: AxiosInstance;
     }
 }
