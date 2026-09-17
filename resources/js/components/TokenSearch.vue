@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { X } from '@lucide/vue';
+import { onClickOutside } from '@vueuse/core';
 import { ref, onMounted, computed } from 'vue';
 import { Calendar } from '@/components/ui/calendar';
-import { onClickOutside } from '@vueuse/core';
-import { X } from '@lucide/vue';
 
 type FilterOption = {
     key: string;
@@ -44,11 +44,14 @@ const parseInitial = (val: string) => {
         tokens.value.push({ key: match[1], value: match[2].replace(/"/g, '') });
         remaining = remaining.replace(match[0], '');
     }
+
     rawInput.value = remaining.trim();
 };
 
 onMounted(() => {
-    if (props.modelValue) parseInitial(props.modelValue);
+    if (props.modelValue) {
+parseInitial(props.modelValue);
+}
 });
 
 const updateParent = () => {
@@ -66,8 +69,13 @@ const handleKeydown = (e: KeyboardEvent) => {
             e.preventDefault();
             tokens.value.push({ key: match[1], value: match[2].replace(/"/g, '') });
             rawInput.value = rawInput.value.replace(regex, '').trim();
-            if (rawInput.value) rawInput.value += ' ';
+
+            if (rawInput.value) {
+rawInput.value += ' ';
+}
+
             updateParent();
+
             if (e.key === 'Enter') {
                 emit('search');
                 isPopoverOpen.value = false;
@@ -95,18 +103,26 @@ const removeToken = (index: number) => {
 
 const activeFilterContext = computed(() => {
     const match = rawInput.value.match(/(?:^|\s)(\w+):([^\s]*)$/);
+
     if (match && props.filters) {
         return props.filters.find(f => f.key === match[1].toLowerCase()) || null;
     }
+
     return null;
 });
 
 const filteredOptions = computed(() => {
-    if (!activeFilterContext.value?.options) return [];
+    if (!activeFilterContext.value?.options) {
+return [];
+}
+
     const match = rawInput.value.match(/(?:^|\s)(\w+):([^\s]*)$/);
     const search = match ? match[2].toLowerCase() : '';
 
-    if (!search) return activeFilterContext.value.options;
+    if (!search) {
+return activeFilterContext.value.options;
+}
+
     return activeFilterContext.value.options.filter(opt => opt.toLowerCase().includes(search));
 });
 
@@ -118,7 +134,10 @@ const selectKey = (key: string) => {
 const selectValue = (key: string, value: string) => {
     tokens.value.push({ key, value });
     rawInput.value = rawInput.value.replace(/(?:^|\s)(\w+):([^\s]*)$/, '').trim();
-    if (rawInput.value) rawInput.value += ' ';
+
+    if (rawInput.value) {
+rawInput.value += ' ';
+}
 
     updateParent();
     isPopoverOpen.value = false;
@@ -127,9 +146,12 @@ const selectValue = (key: string, value: string) => {
 };
 
 const selectDateValue = (val: any) => {
-    if (!val || !activeFilterContext.value) return;
+    if (!val || !activeFilterContext.value) {
+return;
+}
 
     let formattedDate = '';
+
     if (val.year && val.month && val.day) {
         formattedDate = `${val.year}-${String(val.month).padStart(2, '0')}-${String(val.day).padStart(2, '0')}`;
     } else {
@@ -138,7 +160,10 @@ const selectDateValue = (val: any) => {
 
     tokens.value.push({ key: activeFilterContext.value.key, value: formattedDate });
     rawInput.value = rawInput.value.replace(/(?:^|\s)(\w+):([^\s]*)$/, '').trim();
-    if (rawInput.value) rawInput.value += ' ';
+
+    if (rawInput.value) {
+rawInput.value += ' ';
+}
 
     updateParent();
     isPopoverOpen.value = false;

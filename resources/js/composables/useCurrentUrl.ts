@@ -22,7 +22,8 @@ export type UseCurrentUrlReturn = {
     ) => T | F;
 };
 
-const page = usePage();
+export function useCurrentUrl(): UseCurrentUrlReturn {
+    const page = usePage();
 const currentUrlReactive = computed(
     () =>
         new URL(
@@ -32,8 +33,6 @@ const currentUrlReactive = computed(
                 : 'http://localhost',
         ).pathname,
 );
-
-export function useCurrentUrl(): UseCurrentUrlReturn {
     function isCurrentUrl(
         urlToCheck: NonNullable<InertiaLinkProps['href']>,
         currentUrl?: string,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
 import axios from 'axios';
+import debounce from 'lodash/debounce';
 import { ref, onMounted, watch, nextTick } from 'vue';
 import Combobox from '@/components/Combobox.vue';
 import InputError from '@/components/InputError.vue';
@@ -12,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { login } from '@/routes';
-import debounce from 'lodash/debounce';
 
 defineProps<{
     passwordRules: string;
