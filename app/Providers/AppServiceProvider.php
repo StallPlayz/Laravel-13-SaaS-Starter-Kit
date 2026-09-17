@@ -2,12 +2,15 @@
 
 namespace App\Providers;
 
+use App\Events\AdminDataUpdated;
 use App\Http\Responses\LoginResponse;
 use App\Models\User;
 use App\Models\Workspace;
 use Carbon\CarbonImmutable;
+use Illuminate\Log\Events\MessageLogged;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -45,6 +48,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             if ($user->isSuperAdmin()) {
                 return true;
+            }
+        });
+
+        Event::listen(MessageLogged::class, function (MessageLogged $event) {
+            $level = strtoupper($event->level);
+
+            if (in_array($level, ['WARNING', 'ERROR', 'CRITICAL', 'EMERGENCY'])) {
+                broadcast(new AdminDataUpdated('log', ['level' => $level]));
             }
         });
     }
