@@ -1,11 +1,14 @@
 <?php
 
 use App\Actions\Fortify\CreateNewUser;
-use App\Http\Controllers\Admin\PlatformAdminController;
+use App\Http\Controllers\Admin\PlatformHealthController;
+use App\Http\Controllers\Admin\SystemLogController as AdminLogController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WorkspaceController as AdminWorkspaceController;
 use App\Http\Controllers\GeoController;
 use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\PublicWorkspaceController;
+use App\Http\Controllers\SupportPinController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceInvitationController;
 use App\Http\Controllers\WorkspaceMemberController;
@@ -17,9 +20,6 @@ use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Http\Responses\RegisterResponse;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\SupportPinController;
-use App\Http\Controllers\Admin\SystemLogController as AdminLogController;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -58,7 +58,7 @@ Route::middleware(['auth', 'verified', EnsureSuperAdmin::class])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', [PlatformAdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [PlatformHealthController::class, 'dashboard'])->name('dashboard');
         Route::get('/workspaces', [AdminWorkspaceController::class, 'index'])->name('workspaces.index');
         Route::patch('/workspaces/{workspace}/suspend', [AdminWorkspaceController::class, 'toggleSuspension'])->name('workspaces.suspend');
         Route::post('/workspaces/{workspace}/ghost', [AdminWorkspaceController::class, 'enterGhostMode'])->name('workspaces.ghost.enter');

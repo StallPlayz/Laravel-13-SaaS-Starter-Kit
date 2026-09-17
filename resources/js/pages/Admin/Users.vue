@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, router, Link } from '@inertiajs/vue3';
-import { index } from '@/routes/admin/users';
 import debounce from 'lodash/debounce';
-import { watch, ref } from 'vue';
+import { watch, ref, onMounted, onUnmounted } from 'vue';
+import { index } from '@/routes/admin/users';
 
 const props = defineProps<{
     users: {
@@ -48,6 +48,23 @@ const initiateImpersonation = (user: { id: number; name: string }) => {
         });
     }
 };
+
+onMounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.private('admin.health')
+            .listen('.AdminDataUpdated', (e: { type: string }) => {
+                if (e.type === 'user') {
+                    router.reload({ only: ['users'] });
+                }
+            });
+    }
+});
+
+onUnmounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.leave('admin.health');
+    }
+});
 </script>
 
 <template>

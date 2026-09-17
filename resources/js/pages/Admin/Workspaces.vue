@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Head, router, Link } from '@inertiajs/vue3';
-import { index } from '@/routes/admin/workspaces';
 import debounce from 'lodash/debounce';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { index } from '@/routes/admin/workspaces';
+import { Search } from '@lucide/vue';
 
 const props = defineProps<{
     workspaces: {
@@ -51,6 +52,23 @@ const toggleSuspend = (id: number) => {
 const enterGhost = (id: number) => {
     router.post(`/admin/workspaces/${id}/ghost`);
 };
+
+onMounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.private('admin.health')
+            .listen('.AdminDataUpdated', (e: { type: string }) => {
+                if (e.type === 'workspace') {
+                    router.reload({ only: ['workspaces'] });
+                }
+            });
+    }
+});
+
+onUnmounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.leave('admin.health');
+    }
+});
 </script>
 
 <template>

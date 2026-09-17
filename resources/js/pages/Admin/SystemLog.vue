@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Download } from '@lucide/vue';
 import debounce from 'lodash/debounce';
-import { index } from '@/routes/admin/logs';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import TokenSearch from '@/components/TokenSearch.vue';
+import { index } from '@/routes/admin/logs';
 
 interface LogEntry {
     timestamp: string;
@@ -68,9 +68,12 @@ const executeSearch = () => {
 };
 
 const getBadgeClass = (level?: string) => {
-    if (!level) return 'bg-muted text-muted-foreground border border-border';
+    if (!level) {
+return 'bg-muted text-muted-foreground border border-border';
+}
 
     const normalized = String(level).toUpperCase();
+
     switch (normalized) {
         case 'EMERGENCY': case 'ALERT': case 'CRITICAL': case 'ERROR':
             return 'bg-destructive/10 text-destructive border border-destructive/20';
@@ -82,6 +85,23 @@ const getBadgeClass = (level?: string) => {
             return 'bg-muted text-muted-foreground border border-border';
     }
 };
+
+onMounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.private('admin.health')
+            .listen('.AdminDataUpdated', (e: { type: string }) => {
+                if (e.type === 'log') {
+                    router.reload({ only: ['logs'] });
+                }
+            });
+    }
+});
+
+onUnmounted(() => {
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.leave('admin.health');
+    }
+});
 </script>
 
 <template>
