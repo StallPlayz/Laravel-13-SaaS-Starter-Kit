@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Attributes\Casts;
+use App\Concerns\HasCastsAttribute;
+use App\Events\AdminDataUpdated;
 use Database\Factories\WorkspaceFactory;
-use Illuminate\Database\Eloquent\Attributes\Casts;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,5 +43,16 @@ class Workspace extends Model
     public function invitations(): HasMany
     {
         return $this->hasMany(WorkspaceInvitation::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            event(new AdminDataUpdated('workspace'));
+        });
+
+        static::deleted(function () {
+            event(new AdminDataUpdated('workspace'));
+        });
     }
 }

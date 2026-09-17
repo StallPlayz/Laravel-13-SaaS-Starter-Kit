@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Attributes\Casts;
+use App\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
-use Illuminate\Database\Eloquent\Attributes\Casts;
-use Illuminate\Database\Eloquent\Concerns\HasCastsAttribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Guarded([])]
