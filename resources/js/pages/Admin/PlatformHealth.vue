@@ -24,8 +24,14 @@ const props = defineProps<{
     };
     telemetry: {
         labels: string[];
-        errors: number[];
-        warnings: number[];
+        emergency: number[];
+        alert: number[];
+        critical: number[];
+        error: number[];
+        warning: number[];
+        notice: number[];
+        info: number[];
+        debug: number[];
     };
 }>();
 
@@ -55,13 +61,11 @@ onMounted(() => {
                     console.log('Reverb ping received! Level:', e.payload.level);
 
                     const todayIndex = telemetry.value.labels.length - 1;
+                    const level = e.payload.level.toLowerCase() as keyof typeof telemetry.value;
 
-                    if (['ERROR', 'CRITICAL', 'EMERGENCY'].includes(e.payload.level)) {
-                        telemetry.value.errors[todayIndex]++;
-                        telemetry.value.errors = [...telemetry.value.errors];
-                    } else if (e.payload.level === 'WARNING') {
-                        telemetry.value.warnings[todayIndex]++;
-                        telemetry.value.warnings = [...telemetry.value.warnings];
+                    if (level in telemetry.value && level !== 'labels') {
+                        (telemetry.value[level] as number[])[todayIndex]++;
+                        telemetry.value[level] = [...(telemetry.value[level] as number[])] as any;
                     }
                 }
             });
@@ -76,15 +80,51 @@ const chartData = computed(() => ({
     labels: telemetry.value.labels,
     datasets: [
         {
-            label: 'Errors (Critical/Emergency)',
-            backgroundColor: '#ef4444',
-            data: telemetry.value.errors,
+            label: 'Emergency',
+            backgroundColor: '#d946ef', // fuchsia-500
+            data: telemetry.value.emergency,
             borderRadius: 4,
         },
         {
-            label: 'Warnings',
-            backgroundColor: '#f59e0b',
-            data: telemetry.value.warnings,
+            label: 'Alert',
+            backgroundColor: '#f43f5e', // rose-500
+            data: telemetry.value.alert,
+            borderRadius: 4,
+        },
+        {
+            label: 'Critical',
+            backgroundColor: '#ef4444', // red-500
+            data: telemetry.value.critical,
+            borderRadius: 4,
+        },
+        {
+            label: 'Error',
+            backgroundColor: '#f97316', // orange-500
+            data: telemetry.value.error,
+            borderRadius: 4,
+        },
+        {
+            label: 'Warning',
+            backgroundColor: '#f59e0b', // amber-500
+            data: telemetry.value.warning,
+            borderRadius: 4,
+        },
+        {
+            label: 'Notice',
+            backgroundColor: '#10b981', // emerald-500
+            data: telemetry.value.notice,
+            borderRadius: 4,
+        },
+        {
+            label: 'Info',
+            backgroundColor: '#3b82f6', // blue-500
+            data: telemetry.value.info,
+            borderRadius: 4,
+        },
+        {
+            label: 'Debug',
+            backgroundColor: '#64748b', // slate-500
+            data: telemetry.value.debug,
             borderRadius: 4,
         }
     ]

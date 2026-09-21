@@ -16,14 +16,49 @@ class WorkspaceController extends Controller
      */
     public function index(Request $request): Response
     {
+        $rawSearch = $request->search ?? '';
+        $tokens = [];
+        $generalSearch = $rawSearch;
+
+        if (preg_match_all('/(\w+):(".*?"|\S+)/', $rawSearch, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $key = strtolower($match[1]);
+                $value = trim($match[2], '"');
+                $tokens[$key][] = $value;
+                $generalSearch = str_replace($match[0], '', $generalSearch);
+            }
+        }
+        $generalSearch = trim($generalSearch);
+
         $workspaces = Workspace::with('owner')
             ->withCount('users')
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhereHas('owner', function($q) use ($search) {
-                          $q->where('name', 'like', "%{$search}%")
+            ->when($generalSearch, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhereHas('owner', function($q2) use ($search) {
+                          $q2->where('name', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%");
                       });
+                });
+            })
+            ->when(isset($tokens['owner']), function ($query) use ($tokens) {
+                $query->whereHas('owner', function ($q) use ($tokens) {
+                    $q->where('name', 'like', "%{$tokens['owner'][0]}%");
+                });
+            })
+            ->when(isset($tokens['users']), function ($query) use ($tokens) {
+                $query->has('users', '=', $tokens['users'][0]);
+            })
+            ->when(isset($tokens['tier']), function ($query) use ($tokens) {
+                $query->whereIn('tier', $tokens['tier']);
+            })
+            ->when(isset($tokens['status']), function ($query) use ($tokens) {
+                $status = strtolower($tokens['status'][0]);
+                if ($status === 'suspended') {
+                    $query->where('is_suspended', true);
+                } elseif ($status === 'active') {
+                    $query->where('is_suspended', false);
+                }
             })
             ->latest()
             ->paginate(15)

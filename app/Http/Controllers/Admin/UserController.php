@@ -17,10 +17,35 @@ class UserController extends Controller
 {
     public function index(Request $request): Response
     {
+        $rawSearch = $request->search ?? '';
+        $tokens = [];
+        $generalSearch = $rawSearch;
+
+        if (preg_match_all('/(\w+):(".*?"|\S+)/', $rawSearch, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $key = strtolower($match[1]);
+                $value = trim($match[2], '"');
+                $tokens[$key][] = $value;
+                $generalSearch = str_replace($match[0], '', $generalSearch);
+            }
+        }
+        $generalSearch = trim($generalSearch);
+
         $users = User::withCount('workspaces')
-            ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
+            ->when($generalSearch, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when(isset($tokens['role']), function ($query) use ($tokens) {
+                $query->whereIn('platform_role', $tokens['role']);
+            })
+            ->when(isset($tokens['workspaces']), function ($query) use ($tokens) {
+                $query->has('workspaces', '=', $tokens['workspaces'][0]);
+            })
+            ->when(isset($tokens['joined']), function ($query) use ($tokens) {
+                $query->whereDate('created_at', $tokens['joined'][0]);
             })
             ->latest()
             ->paginate(15)
@@ -37,6 +62,10 @@ class UserController extends Controller
         $request->validate([
             'pin' => ['required', 'string'],
         ]);
+
+        if ($user->isSuperAdmin()) {
+            return back()->with('error', 'Cannot impersonate a Super Admin.');
+        }
 
         if (!$user->support_pin || $user->support_pin !== $request->pin || $user->support_pin_expires_at?->isPast()) {
             return back()->with('error', 'Invalid or expired Support PIN.');

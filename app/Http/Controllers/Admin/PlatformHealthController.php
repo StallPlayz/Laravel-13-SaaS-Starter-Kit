@@ -21,8 +21,14 @@ class PlatformHealthController extends Controller
 
         $chartData = [
             'labels' => [],
-            'errors' => [],
-            'warnings' => [],
+            'emergency' => [],
+            'alert' => [],
+            'critical' => [],
+            'error' => [],
+            'warning' => [],
+            'notice' => [],
+            'info' => [],
+            'debug' => [],
         ];
 
         for ($i = 6; $i >= 0; $i--) {
@@ -32,21 +38,34 @@ class PlatformHealthController extends Controller
             $chartData['labels'][] = $date->format('D');
 
             $logPath = storage_path("logs/laravel-{$dateString}.log");
-            $errorCount = 0;
-            $warningCount = 0;
+            
+            $counts = [
+                'emergency' => 0,
+                'alert' => 0,
+                'critical' => 0,
+                'error' => 0,
+                'warning' => 0,
+                'notice' => 0,
+                'info' => 0,
+                'debug' => 0,
+            ];
 
             if (File::exists($logPath)) {
                 $content = file_get_contents($logPath);
 
-                $errorCount = substr_count($content, '.ERROR:')
-                            + substr_count($content, '.CRITICAL:')
-                            + substr_count($content, '.EMERGENCY:');
-
-                $warningCount = substr_count($content, '.WARNING:');
+                $counts['emergency'] = substr_count($content, '.EMERGENCY:');
+                $counts['alert'] = substr_count($content, '.ALERT:');
+                $counts['critical'] = substr_count($content, '.CRITICAL:');
+                $counts['error'] = substr_count($content, '.ERROR:');
+                $counts['warning'] = substr_count($content, '.WARNING:');
+                $counts['notice'] = substr_count($content, '.NOTICE:');
+                $counts['info'] = substr_count($content, '.INFO:');
+                $counts['debug'] = substr_count($content, '.DEBUG:');
             }
 
-            $chartData['errors'][] = $errorCount;
-            $chartData['warnings'][] = $warningCount;
+            foreach ($counts as $level => $count) {
+                $chartData[$level][] = $count;
+            }
         }
 
         return Inertia::render('admin/PlatformHealth', [

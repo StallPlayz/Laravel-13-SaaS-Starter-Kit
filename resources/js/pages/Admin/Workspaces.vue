@@ -3,7 +3,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import debounce from 'lodash/debounce';
 import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { index } from '@/routes/admin/workspaces';
-import { Search } from '@lucide/vue';
+import TokenSearch from '@/components/TokenSearch.vue';
 
 const props = defineProps<{
     workspaces: {
@@ -34,11 +34,15 @@ defineOptions({
 
 const searchQuery = ref(props.filters?.search || '');
 
-watch(searchQuery, debounce((value: string) => {
-    router.get(index(), { search: value }, {
+const executeSearch = () => {
+    router.get(index(), { search: searchQuery.value }, {
         preserveState: true,
         replace: true,
     });
+};
+
+watch(searchQuery, debounce((value: string) => {
+    executeSearch();
 }, 300));
 
 const toggleSuspend = (id: number) => {
@@ -89,9 +93,12 @@ onUnmounted(() => {
                 </div>
 
                 <div class="relative w-full sm:w-72">
-                    <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input v-model="searchQuery" type="text" placeholder="Search workspaces or owners..."
-                        class="h-9 w-full rounded-md border border-input bg-transparent px-8 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                    <TokenSearch v-model="searchQuery" @search="executeSearch" :filters="[
+                        { key: 'owner', label: 'Owner' },
+                        { key: 'users', label: 'Users Count' },
+                        { key: 'tier', label: 'Tier', options: ['free', 'pro'] },
+                        { key: 'status', label: 'Status', options: ['active', 'suspended'] }
+                    ]" />
                 </div>
             </div>
 

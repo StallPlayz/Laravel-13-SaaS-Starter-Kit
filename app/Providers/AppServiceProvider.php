@@ -52,10 +52,26 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Event::listen(MessageLogged::class, function (MessageLogged $event) {
+            if (is_string($event->message) && str_contains($event->message, 'Broadcasting [')) {
+                return;
+            }
+
+            static $isBroadcasting = false;
+
+            if ($isBroadcasting) {
+                return;
+            }
+
             $level = strtoupper($event->level);
 
-            if (in_array($level, ['WARNING', 'ERROR', 'CRITICAL', 'EMERGENCY'])) {
-                broadcast(new AdminDataUpdated('log', ['level' => $level]));
+            if (in_array($level, ['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'])) {
+                $isBroadcasting = true;
+
+                try {
+                    event(new AdminDataUpdated('log', ['level' => $level]));
+                } finally {
+                    $isBroadcasting = false;
+                }
             }
         });
     }

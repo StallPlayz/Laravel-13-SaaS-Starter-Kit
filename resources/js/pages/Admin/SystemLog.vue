@@ -41,7 +41,7 @@ const searchQuery = ref(props.filters?.search || '');
 const selectedDownloadDate = ref(props.filters?.date || props.today);
 
 watch(searchQuery, debounce((value: string) => {
-    router.get('/admin/logs', { 
+    router.get('/admin/logs', {
         search: value,
         date: selectedDownloadDate.value
     }, {
@@ -75,12 +75,22 @@ return 'bg-muted text-muted-foreground border border-border';
     const normalized = String(level).toUpperCase();
 
     switch (normalized) {
-        case 'EMERGENCY': case 'ALERT': case 'CRITICAL': case 'ERROR':
-            return 'bg-destructive/10 text-destructive border border-destructive/20';
+        case 'EMERGENCY':
+            return 'bg-fuchsia-500/10 text-fuchsia-500 border border-fuchsia-500/20';
+        case 'ALERT':
+            return 'bg-rose-500/10 text-rose-500 border border-rose-500/20';
+        case 'CRITICAL':
+            return 'bg-red-500/10 text-red-500 border border-red-500/20';
+        case 'ERROR':
+            return 'bg-orange-500/10 text-orange-500 border border-orange-500/20';
         case 'WARNING':
             return 'bg-amber-500/10 text-amber-500 border border-amber-500/20';
-        case 'INFO': case 'NOTICE':
+        case 'NOTICE':
+            return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20';
+        case 'INFO':
             return 'bg-blue-500/10 text-blue-500 border border-blue-500/20';
+        case 'DEBUG':
+            return 'bg-slate-500/10 text-slate-500 border border-slate-500/20';
         default:
             return 'bg-muted text-muted-foreground border border-border';
     }
@@ -144,7 +154,7 @@ onUnmounted(() => {
 
                     <div class="relative w-full sm:w-72">
                         <TokenSearch v-model="searchQuery" @search="executeSearch" :filters="[
-                            { key: 'severity', label: 'Severity', options: ['info', 'warning', 'error', 'emergency', 'critical'] },
+                            { key: 'severity', label: 'Severity', options: ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'] },
                             { key: 'date', label: 'Log Date', type: 'date' }
                         ]" />
                     </div>

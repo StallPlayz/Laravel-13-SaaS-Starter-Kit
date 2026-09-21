@@ -3,6 +3,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import debounce from 'lodash/debounce';
 import { watch, ref, onMounted, onUnmounted } from 'vue';
 import { index } from '@/routes/admin/users';
+import TokenSearch from '@/components/TokenSearch.vue';
 
 const props = defineProps<{
     users: {
@@ -13,6 +14,7 @@ const props = defineProps<{
             workspaces_count: number;
             created_at: string;
             support_pin_expires_at: string | null;
+            platform_role: string | null;
         }>;
         links: Array<{ url: string | null; label: string; active: boolean }>;
     };
@@ -32,11 +34,15 @@ defineOptions({
 
 const searchQuery = ref(props.filters?.search || '');
 
-watch(searchQuery, debounce((value: string) => {
-    router.get(index(), { search: value }, {
+const executeSearch = () => {
+    router.get(index(), { search: searchQuery.value }, {
         preserveState: true,
         replace: true,
     });
+};
+
+watch(searchQuery, debounce((value: string) => {
+    executeSearch();
 }, 300));
 
 const initiateImpersonation = (user: { id: number; name: string }) => {
@@ -85,9 +91,11 @@ onUnmounted(() => {
                 </div>
 
                 <div class="relative w-full sm:w-72">
-                    <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input v-model="searchQuery" type="text" placeholder="Search users..."
-                        class="h-9 w-full rounded-md border border-input bg-transparent px-8 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
+                    <TokenSearch v-model="searchQuery" @search="executeSearch" :filters="[
+                        { key: 'joined', label: 'Joined Date', type: 'date' },
+                        { key: 'workspaces', label: 'Workspaces Count' },
+                        { key: 'role', label: 'Role', options: ['super_admin', 'user'] }
+                    ]" />
                 </div>
             </div>
 
@@ -97,6 +105,7 @@ onUnmounted(() => {
                         <tr>
                             <th class="px-6 py-3">Name</th>
                             <th class="px-6 py-3">Email</th>
+                            <th class="px-6 py-3">Role</th>
                             <th class="px-6 py-3">Workspaces</th>
                             <th class="px-6 py-3">Joined</th>
                             <th class="px-6 py-3 text-right">Actions</th>
@@ -106,19 +115,29 @@ onUnmounted(() => {
                         <tr v-for="user in users.data" :key="user.id" class="hover:bg-muted/50">
                             <td class="px-6 py-4 font-medium">{{ user.name }}</td>
                             <td class="px-6 py-4 text-muted-foreground">{{ user.email }}</td>
+                            <td class="px-6 py-4">
+                                <span v-if="user.platform_role === 'super_admin'" class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                                    Super Admin
+                                </span>
+                                <span v-else class="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
+                                    User
+                                </span>
+                            </td>
                             <td class="px-6 py-4">{{ user.workspaces_count }}</td>
                             <td class="px-6 py-4 text-muted-foreground">
                                 {{ new Date(user.created_at).toLocaleDateString() }}
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
                                 <button @click="initiateImpersonation(user)"
-                                    class="inline-flex items-center justify-center rounded-md bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-500 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                                    :disabled="user.platform_role === 'super_admin'"
+                                    class="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium text-white focus:ring-2 focus:outline-none"
+                                    :class="user.platform_role === 'super_admin' ? 'bg-muted-foreground cursor-not-allowed opacity-50' : 'bg-amber-600 hover:bg-amber-500 focus:ring-amber-500'">
                                     Impersonate
                                 </button>
                             </td>
                         </tr>
                         <tr v-if="users.data.length === 0">
-                            <td colspan="5" class="px-6 py-4 text-center text-muted-foreground">
+                            <td colspan="6" class="px-6 py-4 text-center text-muted-foreground">
                                 No users found.
                             </td>
                         </tr>
