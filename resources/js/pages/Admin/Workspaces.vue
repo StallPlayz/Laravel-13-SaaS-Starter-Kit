@@ -84,7 +84,7 @@ onUnmounted(() => {
             Platform Workspaces
         </h1>
 
-        <div class="overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b px-6 py-5">
                 <div>
                     <h3 class="text-lg font-medium">Active & Suspended Workspaces</h3>
@@ -102,7 +102,7 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-b-xl">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-muted text-xs text-muted-foreground uppercase">
                         <tr>

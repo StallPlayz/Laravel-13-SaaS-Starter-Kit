@@ -67,12 +67,22 @@ const handleKeydown = (e: KeyboardEvent) => {
 
         if (match) {
             e.preventDefault();
-            tokens.value.push({ key: match[1], value: match[2].replace(/"/g, '') });
+            const key = match[1];
+            const value = match[2].replace(/"/g, '');
+
+            const isDuplicate = tokens.value.some(
+                t => t.key.toLowerCase() === key.toLowerCase() && t.value.toLowerCase() === value.toLowerCase()
+            );
+
+            if (!isDuplicate) {
+                tokens.value.push({ key, value });
+            }
+
             rawInput.value = rawInput.value.replace(regex, '').trim();
 
             if (rawInput.value) {
-rawInput.value += ' ';
-}
+                rawInput.value += ' ';
+            }
 
             updateParent();
 
@@ -113,21 +123,63 @@ const activeFilterContext = computed(() => {
 
 const filteredOptions = computed(() => {
     if (!activeFilterContext.value?.options) {
-return [];
-}
+        return [];
+    }
 
     const match = rawInput.value.match(/(?:^|\s)(\w+):([^\s]*)$/);
     const search = match ? match[2].toLowerCase() : '';
 
-    if (!search) {
-return activeFilterContext.value.options;
-}
+    const currentKey = activeFilterContext.value.key;
+    const selectedValues = tokens.value
+        .filter(t => t.key.toLowerCase() === currentKey.toLowerCase())
+        .map(t => t.value.toLowerCase());
 
-    return activeFilterContext.value.options.filter(opt => opt.toLowerCase().includes(search));
+    const availableOptions = activeFilterContext.value.options.filter(
+        opt => !selectedValues.includes(opt.toLowerCase())
+    );
+
+    if (!search) {
+        return availableOptions;
+    }
+
+    return availableOptions.filter(opt => opt.toLowerCase().includes(search));
+});
+
+const availableFilters = computed(() => {
+    if (!props.filters) return [];
+
+    const lastWordMatch = rawInput.value.match(/(?:^|\s)([^:\s]+)$/);
+    const searchWord = lastWordMatch ? lastWordMatch[1].toLowerCase() : '';
+    
+    return props.filters.filter(filter => {
+        const selectedValues = tokens.value
+            .filter(t => t.key.toLowerCase() === filter.key.toLowerCase())
+            .map(t => t.value.toLowerCase());
+            
+        let isAvailable = false;
+        if (filter.options) {
+            isAvailable = selectedValues.length < filter.options.length;
+        } else {
+            isAvailable = selectedValues.length === 0;
+        }
+        
+        if (!isAvailable) return false;
+        
+        if (searchWord) {
+            return filter.label.toLowerCase().includes(searchWord) || filter.key.toLowerCase().includes(searchWord);
+        }
+        
+        return true;
+    });
 });
 
 const selectKey = (key: string) => {
-    rawInput.value = rawInput.value.trim() + (rawInput.value ? ' ' : '') + `${key}:`;
+    const lastWordMatch = rawInput.value.match(/(?:^|\s)([^:\s]+)$/);
+    if (lastWordMatch) {
+        rawInput.value = rawInput.value.substring(0, rawInput.value.length - lastWordMatch[1].length) + `${key}:`;
+    } else {
+        rawInput.value = rawInput.value.trim() + (rawInput.value ? ' ' : '') + `${key}:`;
+    }
     searchInput.value?.focus();
 };
 
@@ -205,10 +257,15 @@ rawInput.value += ' ';
                 <div v-else class="flex flex-col gap-1">
                     <template v-if="!activeFilterContext">
                         <div class="px-2 py-1.5 text-xs font-medium text-muted-foreground">Filters</div>
-                        <button v-for="filter in filters" :key="filter.key" @mousedown.prevent="selectKey(filter.key)"
+                        <button v-for="filter in availableFilters" :key="filter.key" @mousedown.prevent="selectKey(filter.key)"
                             class="w-full flex items-center px-2 py-1.5 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground text-left cursor-pointer transition-colors">
                             {{ filter.label }} <span class="ml-2 text-muted-foreground">{{ filter.key }}:</span>
                         </button>
+
+                        <div v-if="availableFilters.length === 0"
+                            class="px-2 py-3 text-sm text-center text-muted-foreground">
+                            No more filters available.
+                        </div>
                     </template>
 
                     <template v-else-if="activeFilterContext.options">

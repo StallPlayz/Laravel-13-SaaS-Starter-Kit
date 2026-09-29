@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Database, HardDrive, Zap, CheckCircle2, XCircle } from '@lucide/vue';
 import {
   Chart as ChartJS,
@@ -24,6 +24,7 @@ const props = defineProps<{
     };
     telemetry: {
         labels: string[];
+        dates: string[];
         emergency: number[];
         alert: number[];
         critical: number[];
@@ -53,7 +54,19 @@ watch(() => props.telemetry, (newTelemetry) => {
     telemetry.value = newTelemetry;
 }, { deep: true });
 
+const isCtrlPressed = ref(false);
+
+const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Control' || e.key === 'Meta') isCtrlPressed.value = true;
+};
+const handleKeyUp = (e: KeyboardEvent) => {
+    if (e.key === 'Control' || e.key === 'Meta') isCtrlPressed.value = false;
+};
+
 onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
     if (typeof window !== 'undefined' && window.Echo) {
         window.Echo.private('admin.health')
             .listen('.AdminDataUpdated', (e: { type: string, payload?: { level: string } }) => {
@@ -63,7 +76,7 @@ onMounted(() => {
                     const todayIndex = telemetry.value.labels.length - 1;
                     const level = e.payload.level.toLowerCase() as keyof typeof telemetry.value;
 
-                    if (level in telemetry.value && level !== 'labels') {
+                    if (level in telemetry.value && level !== 'labels' && level !== 'dates') {
                         (telemetry.value[level] as number[])[todayIndex]++;
                         telemetry.value[level] = [...(telemetry.value[level] as number[])] as any;
                     }
@@ -73,7 +86,12 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    window.Echo.leave('admin.health');
+    window.removeEventListener('keydown', handleKeyDown);
+    window.removeEventListener('keyup', handleKeyUp);
+
+    if (typeof window !== 'undefined' && window.Echo) {
+        window.Echo.leave('admin.health');
+    }
 });
 
 const chartData = computed(() => ({
@@ -130,15 +148,113 @@ const chartData = computed(() => ({
     ]
 }));
 
-const chartOptions = {
+const hoverOutlinePlugin = {
+    id: 'hoverOutline',
+    afterDraw(chart: any) {
+        const activeElements = chart.getActiveElements();
+        if (!activeElements.length) return;
+
+        const ctx = chart.ctx;
+        ctx.save();
+
+        if (isCtrlPressed.value) {
+            activeElements.forEach(({ datasetIndex, index }: any) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                const element = meta.data[index];
+                if (!element) return;
+
+                ctx.beginPath();
+                const left = element.x - element.width / 2;
+                const top = element.y;
+                const height = element.base - element.y;
+
+                ctx.rect(left - 2, top - 2, element.width + 4, height + 4);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = chart.data.datasets[datasetIndex].backgroundColor;
+                ctx.stroke();
+            });
+        } else {
+            const index = activeElements[0].index;
+            let minTop = Infinity;
+            let maxBase = -Infinity;
+            let x = 0;
+            let width = 0;
+
+            activeElements.forEach(({ datasetIndex }: any) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                const element = meta.data[index];
+                if (!element) return;
+
+                if (element.base !== element.y) {
+                    if (element.y < minTop) minTop = element.y;
+                    if (element.base > maxBase) maxBase = element.base;
+                    x = element.x;
+                    width = element.width;
+                }
+            });
+
+            if (width > 0 && minTop !== Infinity) {
+                ctx.beginPath();
+                const left = x - width / 2;
+                const height = maxBase - minTop;
+
+                ctx.rect(left - 2, minTop - 2, width + 4, height + 4);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#9ca3af';
+                ctx.stroke();
+            }
+        }
+
+        ctx.restore();
+    }
+};
+
+const chartOptions = computed(() => ({
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (event: any, elements: any[], chart: any) => {
+        if (!elements.length) return;
+
+        const element = elements[0];
+        const dataIndex = element.index;
+        const datasetIndex = element.datasetIndex;
+
+        const date = telemetry.value.dates[dataIndex];
+        const severity = chart.data.datasets[datasetIndex].label.toLowerCase();
+
+        let search = `date:"${date}"`;
+
+        if (event.native && (event.native.ctrlKey || event.native.metaKey)) {
+            search += ` severity:"${severity}"`;
+        }
+
+        router.get('/admin/logs', { search });
+    },
+    onHover: (event: any, elements: any[]) => {
+        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+    },
+    interaction: {
+        mode: (isCtrlPressed.value ? 'dataset' : 'index') as 'dataset' | 'index',
+        intersect: isCtrlPressed.value,
+    },
     plugins: {
         legend: {
             position: 'bottom' as const,
             labels: { color: '#9ca3af' }
         },
-        tooltip: { mode: 'index' as const, intersect: false },
+        tooltip: {
+            mode: (isCtrlPressed.value ? 'dataset' : 'index') as 'dataset' | 'index',
+            intersect: isCtrlPressed.value,
+            callbacks: {
+                footer: () => {
+                    return [
+                        '',
+                        'Click to view logs for this day',
+                        'Ctrl+Click to filter by specific severity'
+                    ];
+                }
+            }
+        },
     },
     scales: {
         x: {
@@ -152,7 +268,7 @@ const chartOptions = {
             ticks: { color: '#9ca3af', precision: 0 }
         }
     }
-};
+}));
 </script>
 
 <template>
@@ -214,7 +330,7 @@ const chartOptions = {
             </div>
 
             <div class="relative h-[400px] w-full">
-                <Bar :data="chartData" :options="chartOptions" />
+                <Bar :data="chartData" :options="chartOptions" :plugins="[hoverOutlinePlugin]" />
             </div>
         </div>
     </div>

@@ -34,8 +34,8 @@ class UserController extends Controller
         $users = User::withCount('workspaces')
             ->when($generalSearch, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                    $q->where('name', 'ilike', "%{$search}%")
+                      ->orWhere('email', 'ilike', "%{$search}%");
                 });
             })
             ->when(isset($tokens['role']), function ($query) use ($tokens) {

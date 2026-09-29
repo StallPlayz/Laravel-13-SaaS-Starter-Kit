@@ -21,6 +21,7 @@ class PlatformHealthController extends Controller
 
         $chartData = [
             'labels' => [],
+            'dates' => [],
             'emergency' => [],
             'alert' => [],
             'critical' => [],
@@ -36,9 +37,10 @@ class PlatformHealthController extends Controller
             $dateString = $date->format('Y-m-d');
 
             $chartData['labels'][] = $date->format('D');
+            $chartData['dates'][] = $dateString;
 
             $logPath = storage_path("logs/laravel-{$dateString}.log");
-            
+
             $counts = [
                 'emergency' => 0,
                 'alert' => 0,

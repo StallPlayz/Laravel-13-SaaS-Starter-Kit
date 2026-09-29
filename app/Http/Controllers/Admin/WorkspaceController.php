@@ -34,16 +34,16 @@ class WorkspaceController extends Controller
             ->withCount('users')
             ->when($generalSearch, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
+                    $q->where('name', 'ilike', "%{$search}%")
                       ->orWhereHas('owner', function($q2) use ($search) {
-                          $q2->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                          $q2->where('name', 'ilike', "%{$search}%")
+                            ->orWhere('email', 'ilike', "%{$search}%");
                       });
                 });
             })
             ->when(isset($tokens['owner']), function ($query) use ($tokens) {
                 $query->whereHas('owner', function ($q) use ($tokens) {
-                    $q->where('name', 'like', "%{$tokens['owner'][0]}%");
+                    $q->where('name', 'ilike', "%{$tokens['owner'][0]}%");
                 });
             })
             ->when(isset($tokens['users']), function ($query) use ($tokens) {

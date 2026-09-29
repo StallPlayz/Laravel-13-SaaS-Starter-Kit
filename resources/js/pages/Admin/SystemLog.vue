@@ -123,7 +123,7 @@ onUnmounted(() => {
             System Logs
         </h1>
 
-        <div class="overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
 
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b px-6 py-5">
                 <div>
@@ -161,7 +161,7 @@ onUnmounted(() => {
                 </div>
             </div>
 
-            <div class="max-h-[600px] overflow-auto">
+            <div class="max-h-[600px] overflow-auto rounded-b-xl">
                 <table class="w-full text-left text-sm">
                     <thead class="sticky top-0 z-10 bg-muted text-xs uppercase text-muted-foreground shadow-sm">
                         <tr>
