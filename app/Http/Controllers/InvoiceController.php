@@ -12,13 +12,21 @@ use Inertia\Response;
 
 class InvoiceController extends Controller
 {
-    public function index(Workspace $workspace): Response
+    public function index(Request $request, Workspace $workspace): Response
     {
-        if (! Gate::allows('manage-workspace', $workspace)) {
+        if (! Gate::allows('view-workspace', $workspace)) {
             abort(403);
         }
 
-        $invoices = $workspace->invoices()->with('project')->latest()->get();
+        $canManage = Gate::allows('manage-workspace', $workspace);
+
+        $query = $workspace->invoices()->with('project')->latest();
+
+        if (!$canManage) {
+            $query->where('client_id', $request->user()->id);
+        }
+
+        $invoices = $query->get();
 
         return Inertia::render('invoices/Index', [
             'workspace' => $workspace,
@@ -33,10 +41,12 @@ class InvoiceController extends Controller
         }
 
         $projects = $workspace->projects()->get();
+        $clients = $workspace->users()->wherePivot('role', 'client')->get();
 
         return Inertia::render('invoices/Create', [
             'workspace' => $workspace,
             'projects' => $projects,
+            'clients' => $clients,
         ]);
     }
 
@@ -47,6 +57,7 @@ class InvoiceController extends Controller
         }
 
         $request->validate([
+            'client_id' => ['nullable', 'exists:users,id'],
             'client_name' => ['required', 'string', 'max:255'],
             'client_email' => ['nullable', 'email', 'max:255'],
             'project_id' => ['nullable', 'exists:projects,id'],
@@ -68,6 +79,7 @@ class InvoiceController extends Controller
         $total = $subtotal + $tax;
 
         $invoice = $workspace->invoices()->create([
+            'client_id' => $request->client_id,
             'client_name' => $request->client_name,
             'client_email' => $request->client_email,
             'project_id' => $request->project_id,
@@ -93,14 +105,19 @@ class InvoiceController extends Controller
             ->with('success', 'Invoice created successfully.');
     }
 
-    public function show(Workspace $workspace, Invoice $invoice): Response
+    public function show(Request $request, Workspace $workspace, Invoice $invoice): Response
     {
-        if (! Gate::allows('manage-workspace', $workspace)) {
+        if (! Gate::allows('view-workspace', $workspace)) {
             abort(403);
         }
 
         if ($invoice->workspace_id !== $workspace->id) {
             abort(404);
+        }
+
+        $canManage = Gate::allows('manage-workspace', $workspace);
+        if (!$canManage && $invoice->client_id !== $request->user()->id) {
+            abort(403, 'You can only view your own invoices.');
         }
 
         $invoice->load(['items', 'project']);

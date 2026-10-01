@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 const props = defineProps<{
     workspace: any;
     projects: any[];
+    clients: any[];
 }>();
 
 setLayoutProps({
@@ -27,6 +28,7 @@ setLayoutProps({
 });
 
 const form = useForm({
+    client_id: '',
     client_name: '',
     client_email: '',
     project_id: '',
@@ -37,6 +39,16 @@ const form = useForm({
         { description: '', quantity: 1, unit_price: 0 }
     ],
 });
+
+const handleClientChange = () => {
+    if (form.client_id) {
+        const client = props.clients.find(c => c.id === form.client_id);
+        if (client) {
+            form.client_name = client.name;
+            form.client_email = client.email;
+        }
+    }
+};
 
 const addItem = () => {
     form.items.push({ description: '', quantity: 1, unit_price: 0 });
@@ -73,6 +85,17 @@ const submit = () => {
                     <div class="space-y-6 rounded-xl border bg-card p-6 shadow-sm">
                         <h3 class="font-medium text-lg">Client Details</h3>
                         
+                        <div class="grid gap-2">
+                            <Label for="client_id">Select Client (Optional)</Label>
+                            <select id="client_id" v-model="form.client_id" @change="handleClientChange" class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                                <option value="">Custom Client</option>
+                                <option v-for="client in clients" :key="client.id" :value="client.id">
+                                    {{ client.name }} ({{ client.email }})
+                                </option>
+                            </select>
+                            <InputError :message="form.errors.client_id" />
+                        </div>
+
                         <div class="grid gap-2">
                             <Label for="client_name">Client Name</Label>
                             <Input id="client_name" v-model="form.client_name" required />
