@@ -31,11 +31,14 @@ const mainNavItems = computed<NavItem[]>(() => {
     const projectsUrl = workspace
         ? `/workspaces/${workspace.slug}/projects`
         : '/dashboard';
+    const invoicesUrl = workspace
+        ? `/workspaces/${workspace.slug}/invoices`
+        : '/dashboard';
 
     return [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
         { title: 'Projects', href: projectsUrl, icon: Briefcase },
-        { title: 'Invoices', href: '/invoices', icon: Receipt },
+        { title: 'Invoices', href: invoicesUrl, icon: Receipt },
         { title: 'Directory', href: '/directory', icon: Users },
         { title: 'Workspace Settings', href: settingsUrl, icon: Settings },
     ];

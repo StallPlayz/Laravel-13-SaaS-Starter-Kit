@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SystemLogController as AdminLogController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WorkspaceController as AdminWorkspaceController;
 use App\Http\Controllers\GeoController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PublicWorkspaceController;
@@ -58,9 +59,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
     Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'tasks'])->name('projects.tasks');
     Route::post('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'storeTask'])->name('projects.tasks.store');
+    Route::patch('/workspaces/{workspace:slug}/projects/{project:slug}/tasks/{task}', [ProjectController::class, 'updateTask'])->name('projects.tasks.update');
     Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/settings', [ProjectController::class, 'settings'])->name('projects.settings');
     Route::put('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
+    Route::get('/workspaces/{workspace:slug}/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/workspaces/{workspace:slug}/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
+    Route::post('/workspaces/{workspace:slug}/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+    Route::get('/workspaces/{workspace:slug}/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::patch('/workspaces/{workspace:slug}/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
 
     Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
     Route::post('/user/support-pin', [SupportPinController::class, 'store'])->name('user.support-pin.store');

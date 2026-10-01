@@ -38,7 +38,7 @@ defineProps<{
                                 v-if="descriptionSuffix"
                                 class="text-primary"
                                 >{{ descriptionSuffix }}</strong
-                            >.
+                            >
                         </p>
                     </div>
                 </div>

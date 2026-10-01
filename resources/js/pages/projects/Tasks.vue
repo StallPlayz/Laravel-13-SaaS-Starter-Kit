@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage, router } from '@inertiajs/vue3';
 import { setLayoutProps } from '@inertiajs/vue3';
 import { Plus, CheckCircle2, Circle, Clock, AlertCircle } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import CreateTaskModal from './CreateTaskModal.vue';
 import { index, show, tasks } from '@/routes/projects';
 
@@ -28,6 +34,27 @@ setLayoutProps({
         },
     ],
 });
+
+const page = usePage();
+const currentUser = computed(() => page.props.auth.user as any);
+const currentRole = computed(() => page.props.auth.currentRole as string);
+
+const canUpdateTask = (task: any) => {
+    if (currentRole.value === 'owner' || currentRole.value === 'admin') {
+        return true;
+    }
+    return task.assignee_id === currentUser.value.id;
+};
+
+const updateTaskStatus = (task: any, status: string) => {
+    if (task.status === status) return;
+    
+    router.patch(`/workspaces/${props.workspace.slug}/projects/${props.project.slug}/tasks/${task.id}`, {
+        status,
+    }, {
+        preserveScroll: true,
+    });
+};
 
 const showCreateModal = ref(false);
 
@@ -79,9 +106,34 @@ const getStatusColor = (status: string) => {
         </div>
 
         <div v-else class="grid gap-4">
-            <div v-for="task in project.tasks" :key="task.id" class="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer">
+            <div v-for="task in project.tasks" :key="task.id" class="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
                 <div class="flex items-center gap-4">
-                    <component :is="getStatusIcon(task.status)" class="h-5 w-5" :class="getStatusColor(task.status)" />
+                    <DropdownMenu v-if="canUpdateTask(task)">
+                        <DropdownMenuTrigger as-child>
+                            <button class="focus:outline-none hover:opacity-80 transition-opacity">
+                                <component :is="getStatusIcon(task.status)" class="h-5 w-5" :class="getStatusColor(task.status)" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem @click="updateTaskStatus(task, 'todo')">
+                                <Circle class="mr-2 h-4 w-4 text-muted-foreground" />
+                                <span>To Do</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="updateTaskStatus(task, 'in_progress')">
+                                <Clock class="mr-2 h-4 w-4 text-blue-500" />
+                                <span>In Progress</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="updateTaskStatus(task, 'review')">
+                                <AlertCircle class="mr-2 h-4 w-4 text-amber-500" />
+                                <span>Review</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem @click="updateTaskStatus(task, 'done')">
+                                <CheckCircle2 class="mr-2 h-4 w-4 text-emerald-500" />
+                                <span>Done</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <component v-else :is="getStatusIcon(task.status)" class="h-5 w-5" :class="getStatusColor(task.status)" />
                     <div>
                         <p class="font-medium">{{ task.title }}</p>
                         <div class="flex items-center gap-2 mt-1 text-xs text-muted-foreground">

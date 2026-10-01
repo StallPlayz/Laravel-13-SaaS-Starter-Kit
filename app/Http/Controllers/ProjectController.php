@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\Workspace;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -123,6 +124,32 @@ class ProjectController extends Controller
         ]);
 
         return back()->with('success', 'Task created successfully.');
+    }
+
+    public function updateTask(Request $request, Workspace $workspace, Project $project, Task $task): RedirectResponse
+    {
+        if (! Gate::allows('view-workspace', $workspace)) {
+            abort(403);
+        }
+
+        if ($project->workspace_id !== $workspace->id || $task->project_id !== $project->id) {
+            abort(404);
+        }
+
+        $canManage = Gate::allows('manage-workspace', $workspace);
+        if (!$canManage && $task->assignee_id !== $request->user()->id) {
+            abort(403, 'You can only update tasks assigned to you.');
+        }
+
+        $request->validate([
+            'status' => ['required', 'string', 'in:todo,in_progress,review,done'],
+        ]);
+
+        $task->update([
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Task updated successfully.');
     }
 
     public function settings(Workspace $workspace, Project $project): Response

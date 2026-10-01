@@ -47,4 +47,12 @@ class Project extends Model
     {
         return $this->hasMany(Milestone::class);
     }
+
+    /**
+     * Get the invoices for the project.
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }
