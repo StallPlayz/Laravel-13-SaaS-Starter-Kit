@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -20,7 +21,10 @@ class WorkspaceInvitationController extends Controller
 {
     public function store(Request $request, Workspace $workspace): RedirectResponse
     {
-        // Gate::authorize('invite', $workspace);
+        if (! Gate::allows('manage-workspace', $workspace)) {
+            abort(403, 'You do not have permission to invite users to this workspace.');
+        }
+
         $validated = $request->validate([
             'email' => ['required', 'email', 'max:255'],
             'role' => ['required', 'in:admin,member,client'],

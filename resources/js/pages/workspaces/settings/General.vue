@@ -40,7 +40,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.put(`/workspaces/${props.workspace.id}`);
+    form.put(`/workspaces/${props.workspace.slug}`);
 };
 </script>
 

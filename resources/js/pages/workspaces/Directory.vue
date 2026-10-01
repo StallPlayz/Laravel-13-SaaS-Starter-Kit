@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useReadOnly } from '@/composables/useReadOnly';
 import { directory } from '@/routes';
 
 const props = defineProps<{
-    workspace: { id: number; name: string };
+    workspace: { id: number; name: string; slug: string };
     members: Array<{ id: number; name: string; email: string; role: string }>;
     pendingInvitations: Array<{
         id: number;
@@ -28,13 +29,17 @@ defineOptions({
 
 const { isReadOnly } = useReadOnly();
 
+const page = usePage();
+const currentRole = computed(() => page.props.auth.currentRole as string);
+const canInvite = computed(() => !isReadOnly.value && (currentRole.value === 'owner' || currentRole.value === 'admin'));
+
 const form = useForm({
     email: '',
     role: 'client',
 });
 
 const sendInvite = () => {
-    form.post(`/workspaces/${props.workspace.id}/invitations`, {
+    form.post(`/workspaces/${props.workspace.slug}/invitations`, {
         preserveScroll: true,
         onSuccess: () => form.reset(),
     });
@@ -46,6 +51,7 @@ const sendInvite = () => {
 
     <div class="mx-auto max-w-7xl space-y-8 py-10 sm:px-6 lg:px-8">
         <div
+            v-if="canInvite"
             class="overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm"
         >
             <div class="border-b px-6 py-5">

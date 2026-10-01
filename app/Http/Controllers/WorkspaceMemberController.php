@@ -38,6 +38,7 @@ class WorkspaceMemberController extends Controller
             'workspace' => [
                 'id' => $workspace->id,
                 'name' => $workspace->name,
+                'slug' => $workspace->slug,
             ],
             'members' => $workspace->users->map(function ($workspaceUser) {
                 /** @var Pivot $pivot */

@@ -25,17 +25,26 @@ const page = usePage();
 const currentRole = computed(() => page.props.auth.currentRole);
 
 const mainNavItems = computed<NavItem[]>(() => {
+    const workspace = page.props.auth.activeWorkspace;
+    const projectsUrl = workspace
+        ? `/workspaces/${workspace.slug}/projects`
+        : '/dashboard';
+    const invoicesUrl = workspace
+        ? `/workspaces/${workspace.slug}/invoices`
+        : '/dashboard';
+
     const items: NavItem[] = [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
-        { title: 'My Projects', href: '/projects', icon: Folder },
+        { title: 'My Projects', href: projectsUrl, icon: Folder },
     ];
 
     if (currentRole.value === 'member') {
-        items.push({ title: 'My Tasks', href: '/tasks', icon: CheckSquare });
+        // TODO: Implement a global "My Tasks" view later
+        // items.push({ title: 'My Tasks', href: '/tasks', icon: CheckSquare });
     }
 
     if (currentRole.value === 'client') {
-        items.push({ title: 'Invoices', href: '/invoices', icon: CreditCard });
+        items.push({ title: 'Invoices', href: invoicesUrl, icon: CreditCard });
     }
 
     return items;
