@@ -7,6 +7,8 @@ import PlatformAdminLayout from '@/layouts/app/PlatformAdminLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import WorkspaceSettingsLayout from '@/layouts/workspaces/SettingsLayout.vue';
+import ProjectLayout from '@/layouts/projects/ProjectLayout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 import { configureEcho } from '@laravel/echo-vue';
 
@@ -63,6 +65,12 @@ createInertiaApp({
                 return PlatformAdminLayout;
             case name.startsWith('settings/'):
                 return [AppLayout, SettingsLayout];
+            case name.startsWith('workspaces/settings/'):
+                return [AppLayout, WorkspaceSettingsLayout];
+            case name === 'projects/Create' || name === 'projects/Index':
+                return AppLayout;
+            case name.startsWith('projects/'):
+                return [AppLayout, ProjectLayout];
             default:
                 return AppLayout;
         }

@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use \Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -59,6 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Get the tasks assigned to the user.
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'assignee_id');
+    }
+
+    /**
      * Get the user's role in the given workspace.
      */
     public function workspaceRole(Workspace $workspace): ?string
@@ -89,6 +98,20 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function isSuperAdmin(): bool
     {
         return $this->platform_role === 'super_admin';
+    }
+
+    /**
+     * Get the user's current active workspace.
+     */
+    public function currentWorkspace(): ?Workspace
+    {
+        $activeWorkspaceId = request()->session()->get('active_workspace_id');
+
+        if ($activeWorkspaceId) {
+            return $this->workspaces()->find($activeWorkspaceId);
+        }
+
+        return $this->workspaces()->first();
     }
 
     /**

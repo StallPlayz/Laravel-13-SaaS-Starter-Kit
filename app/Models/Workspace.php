@@ -45,6 +45,12 @@ class Workspace extends Model
         return $this->hasMany(WorkspaceInvitation::class);
     }
 
+    /** @return HasMany<Project, $this> */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     protected static function booted(): void
     {
         static::saved(function () {

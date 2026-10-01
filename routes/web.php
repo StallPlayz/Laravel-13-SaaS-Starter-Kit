@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WorkspaceController as AdminWorkspaceController;
 use App\Http\Controllers\GeoController;
 use App\Http\Controllers\OtpLoginController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PublicWorkspaceController;
 use App\Http\Controllers\SupportPinController;
 use App\Http\Controllers\WorkspaceController;
@@ -46,9 +47,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/workspaces/create', [WorkspaceController::class, 'create'])->name('workspaces.create');
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
-    Route::get('/workspaces/{workspace}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
-    Route::put('/workspaces/{workspace}', [WorkspaceController::class, 'update'])->name('workspaces.update');
-    Route::post('/workspaces/{workspace}/invitations', [WorkspaceInvitationController::class, 'store'])->name('workspaces.invitations.store');
+    Route::get('/workspaces/{workspace:slug}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
+    Route::get('/workspaces/{workspace:slug}/settings/appearance', [WorkspaceController::class, 'appearance'])->name('workspaces.settings.appearance');
+    Route::put('/workspaces/{workspace:slug}', [WorkspaceController::class, 'update'])->name('workspaces.update');
+    Route::post('/workspaces/{workspace:slug}/invitations', [WorkspaceInvitationController::class, 'store'])->name('workspaces.invitations.store');
+    
+    Route::get('/workspaces/{workspace:slug}/projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('/workspaces/{workspace:slug}/projects/create', [ProjectController::class, 'create'])->name('projects.create');
+    Route::post('/workspaces/{workspace:slug}/projects', [ProjectController::class, 'store'])->name('projects.store');
+    Route::get('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'show'])->name('projects.show');
+    Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'tasks'])->name('projects.tasks');
+    Route::post('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'storeTask'])->name('projects.tasks.store');
+    Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/settings', [ProjectController::class, 'settings'])->name('projects.settings');
+    Route::put('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'update'])->name('projects.update');
+    Route::delete('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+
     Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
     Route::post('/user/support-pin', [SupportPinController::class, 'store'])->name('user.support-pin.store');
     Route::post('/admin/impersonation/leave', [AdminUserController::class, 'leaveImpersonation'])->name('admin.impersonation.leave');

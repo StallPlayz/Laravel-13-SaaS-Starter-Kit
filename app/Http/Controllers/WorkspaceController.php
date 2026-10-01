@@ -68,7 +68,18 @@ class WorkspaceController extends Controller
             abort(403);
         }
 
-        return Inertia::render('workspaces/Settings', [
+        return Inertia::render('workspaces/settings/General', [
+            'workspace' => $workspace,
+        ]);
+    }
+
+    public function appearance(Workspace $workspace): Response
+    {
+        if (! Gate::allows('manage-workspace', $workspace)) {
+            abort(403);
+        }
+
+        return Inertia::render('workspaces/settings/Appearance', [
             'workspace' => $workspace,
         ]);
     }
