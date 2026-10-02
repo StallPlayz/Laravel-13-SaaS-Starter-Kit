@@ -12,6 +12,7 @@ import { index, show, settings } from '@/routes/projects';
 const props = defineProps<{
     workspace: any;
     project: any;
+    clients: any[];
 }>();
 
 setLayoutProps({
@@ -38,6 +39,7 @@ const form = useForm({
     slug: props.project.slug,
     description: props.project.description || '',
     status: props.project.status,
+    client_id: props.project.client_id || '',
 });
 
 const submit = () => {
@@ -110,6 +112,22 @@ const submit = () => {
                             <option value="archived">Archived</option>
                         </select>
                         <InputError class="mt-2" :message="form.errors.status" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="client_id">Assign Client (Optional)</Label>
+                        <select
+                            id="client_id"
+                            v-model="form.client_id"
+                            :disabled="isReadOnly"
+                            class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <option value="">No Client</option>
+                            <option v-for="client in clients" :key="client.id" :value="client.id">
+                                {{ client.name }} ({{ client.email }})
+                            </option>
+                        </select>
+                        <InputError class="mt-2" :message="form.errors.client_id" />
                     </div>
                 </div>
             </div>

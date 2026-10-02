@@ -11,6 +11,7 @@ import { index, create } from '@/routes/projects';
 
 const props = defineProps<{
     workspace: any;
+    clients: any[];
 }>();
 
 setLayoutProps({
@@ -32,6 +33,7 @@ const form = useForm({
     name: '',
     slug: '',
     description: '',
+    client_id: '',
 });
 
 const submit = () => {
@@ -90,6 +92,22 @@ const submit = () => {
                             class="mt-1 block w-full"
                         />
                         <InputError class="mt-2" :message="form.errors.description" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="client_id">Assign Client (Optional)</Label>
+                        <select
+                            id="client_id"
+                            v-model="form.client_id"
+                            :disabled="isReadOnly"
+                            class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <option value="">No Client</option>
+                            <option v-for="client in clients" :key="client.id" :value="client.id">
+                                {{ client.name }} ({{ client.email }})
+                            </option>
+                        </select>
+                        <InputError class="mt-2" :message="form.errors.client_id" />
                     </div>
                 </div>
             </div>

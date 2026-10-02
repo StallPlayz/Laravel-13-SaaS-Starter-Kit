@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'tasks'])->name('projects.tasks');
     Route::post('/workspaces/{workspace:slug}/projects/{project:slug}/tasks', [ProjectController::class, 'storeTask'])->name('projects.tasks.store');
     Route::patch('/workspaces/{workspace:slug}/projects/{project:slug}/tasks/{task}', [ProjectController::class, 'updateTask'])->name('projects.tasks.update');
+    Route::patch('/workspaces/{workspace:slug}/projects/{project:slug}/tasks/{task}/approve', [ProjectController::class, 'approveTask'])->name('projects.tasks.approve');
     Route::get('/workspaces/{workspace:slug}/projects/{project:slug}/settings', [ProjectController::class, 'settings'])->name('projects.settings');
     Route::put('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/workspaces/{workspace:slug}/projects/{project:slug}', [ProjectController::class, 'destroy'])->name('projects.destroy');

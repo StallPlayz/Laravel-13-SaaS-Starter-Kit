@@ -46,11 +46,32 @@ const canUpdateTask = (task: any) => {
     return task.assignee_id === currentUser.value.id;
 };
 
+const canApproveTask = (task: any) => {
+    return currentRole.value === 'client' && task.requires_approval && task.approval_status === 'pending';
+};
+
 const updateTaskStatus = (task: any, status: string) => {
     if (task.status === status) return;
     
     router.patch(`/workspaces/${props.workspace.slug}/projects/${props.project.slug}/tasks/${task.id}`, {
         status,
+    }, {
+        preserveScroll: true,
+    });
+};
+
+const submitApproval = (task: any, status: string) => {
+    router.patch(`/workspaces/${props.workspace.slug}/projects/${props.project.slug}/tasks/${task.id}/approve`, {
+        approval_status: status,
+    }, {
+        preserveScroll: true,
+    });
+};
+
+const requestApproval = (task: any) => {
+    router.patch(`/workspaces/${props.workspace.slug}/projects/${props.project.slug}/tasks/${task.id}`, {
+        requires_approval: true,
+        approval_status: 'pending',
     }, {
         preserveScroll: true,
     });
@@ -141,10 +162,24 @@ const getStatusColor = (status: string) => {
                                 {{ task.milestone.title }}
                             </span>
                             <span v-if="task.due_date">Due {{ new Date(task.due_date).toLocaleDateString() }}</span>
+                            
+                            <span v-if="task.requires_approval" class="inline-flex items-center gap-1 ml-2">
+                                <span v-if="task.approval_status === 'pending'" class="text-amber-500 font-medium">Pending Approval</span>
+                                <span v-else-if="task.approval_status === 'approved'" class="text-emerald-500 font-medium">Approved</span>
+                                <span v-else-if="task.approval_status === 'rejected'" class="text-red-500 font-medium">Changes Requested</span>
+                            </span>
                         </div>
                     </div>
                 </div>
                 <div class="flex items-center gap-4">
+                    <div v-if="canApproveTask(task)" class="flex items-center gap-2 mr-4">
+                        <Button size="sm" variant="outline" class="text-emerald-600 border-emerald-200 hover:bg-emerald-50" @click="submitApproval(task, 'approved')">Approve</Button>
+                        <Button size="sm" variant="outline" class="text-red-600 border-red-200 hover:bg-red-50" @click="submitApproval(task, 'rejected')">Reject</Button>
+                    </div>
+                    <div v-else-if="(currentRole === 'owner' || currentRole === 'admin') && !task.requires_approval && task.status === 'review'" class="mr-4">
+                        <Button size="sm" variant="secondary" @click="requestApproval(task)">Request Approval</Button>
+                    </div>
+
                     <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
                         :class="{
                             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': task.priority === 'urgent',

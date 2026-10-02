@@ -17,12 +17,16 @@ class Task extends Model
         'title',
         'description',
         'status',
+        'requires_approval',
+        'approval_status',
+        'approval_feedback',
         'priority',
         'due_date',
     ];
 
     protected $casts = [
         'due_date' => 'date',
+        'requires_approval' => 'boolean',
     ];
 
     public function project(): BelongsTo

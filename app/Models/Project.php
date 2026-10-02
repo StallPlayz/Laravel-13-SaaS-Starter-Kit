@@ -18,6 +18,7 @@ class Project extends Model
      */
     protected $fillable = [
         'workspace_id',
+        'client_id',
         'name',
         'slug',
         'description',
@@ -30,6 +31,14 @@ class Project extends Model
     public function workspace(): BelongsTo
     {
         return $this->belongsTo(Workspace::class);
+    }
+
+    /**
+     * Get the client assigned to the project.
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'client_id');
     }
 
     /**
