@@ -18,11 +18,11 @@ const sidebarNavItems = computed<NavItem[]>(() => {
     return [
         {
             title: 'General',
-            href: `/workspaces/${workspace.value.id}/settings`,
+            href: `/workspaces/${workspace.value.slug}/settings`,
         },
         {
             title: 'Appearance',
-            href: `/workspaces/${workspace.value.id}/settings/appearance`,
+            href: `/workspaces/${workspace.value.slug}/settings/appearance`,
         },
     ];
 });
