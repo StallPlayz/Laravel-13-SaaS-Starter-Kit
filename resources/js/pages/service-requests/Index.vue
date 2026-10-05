@@ -38,6 +38,7 @@ const showCreateModal = ref(false);
 const showReviewModal = ref(false);
 const showConvertModal = ref(false);
 const selectedRequest = ref<any>(null);
+const feedback = ref('');
 
 const form = useForm({
     title: '',
@@ -50,10 +51,12 @@ const convertForm = useForm({
     description: '',
     type: 'project',
     project_id: '',
+    feedback: '',
 });
 
 const openReviewModal = (request: any) => {
     selectedRequest.value = request;
+    feedback.value = request.feedback || '';
     showReviewModal.value = true;
 };
 
@@ -64,6 +67,7 @@ const openConvertModal = () => {
     convertForm.description = selectedRequest.value.description;
     convertForm.type = selectedRequest.value.type === 'task' ? 'task' : 'project';
     convertForm.project_id = '';
+    convertForm.feedback = feedback.value;
     
     showReviewModal.value = false;
     showConvertModal.value = true;
@@ -74,6 +78,7 @@ const updateStatus = (status: string) => {
     
     router.patch(`/workspaces/${props.workspace.slug}/service-requests/${selectedRequest.value.id}/status`, {
         status,
+        feedback: feedback.value,
     }, {
         preserveScroll: true,
         onSuccess: () => {
@@ -160,12 +165,18 @@ const getStatusColor = (status: string) => {
                             Submitted on {{ new Date(request.created_at).toLocaleDateString() }}
                         </p>
                     </div>
-                    <div class="flex items-center gap-2" v-if="canManage && request.status === 'pending'">
-                        <Button size="sm" variant="outline" @click="openReviewModal(request)">Review</Button>
+                    <div class="flex items-center gap-2" v-if="canManage && ['pending', 'reviewed'].includes(request.status)">
+                        <Button size="sm" variant="outline" @click="openReviewModal(request)">
+                            {{ request.status === 'reviewed' ? 'Manage' : 'Review' }}
+                        </Button>
                     </div>
                 </div>
                 <div class="bg-muted/50 rounded-lg p-4 text-sm whitespace-pre-wrap">
                     {{ request.description }}
+                </div>
+                <div v-if="request.feedback" class="mt-4 p-4 bg-primary/5 border-l-4 border-primary rounded-r-lg text-sm">
+                    <p class="font-semibold mb-1">Agency Response:</p>
+                    <p class="whitespace-pre-wrap">{{ request.feedback }}</p>
                 </div>
                 <div class="mt-4 flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Type: {{ request.type }}
@@ -246,6 +257,11 @@ const getStatusColor = (status: string) => {
                         <p class="font-medium capitalize">{{ selectedRequest.type }}</p>
                     </div>
 
+                    <div>
+                        <h4 class="text-sm font-medium text-muted-foreground mb-1">Message to Client (Optional)</h4>
+                        <textarea v-model="feedback" placeholder="Explain your decision or provide an update..." rows="3" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                    </div>
+
                     <div class="flex justify-between items-center pt-4 border-t">
                         <div class="flex gap-2">
                             <Button variant="outline" class="text-red-600 hover:text-red-700 hover:bg-red-50" @click="updateStatus('rejected')">Reject</Button>
@@ -298,6 +314,12 @@ const getStatusColor = (status: string) => {
                         <Label for="convert_description">Description</Label>
                         <textarea id="convert_description" v-model="convertForm.description" rows="6" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"></textarea>
                         <InputError :message="convertForm.errors.description" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="convert_feedback">Message to Client (Optional)</Label>
+                        <textarea id="convert_feedback" v-model="convertForm.feedback" placeholder="Let the client know this is being worked on..." rows="3" class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"></textarea>
+                        <InputError :message="convertForm.errors.feedback" />
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4 border-t">

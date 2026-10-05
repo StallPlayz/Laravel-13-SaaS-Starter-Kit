@@ -16,6 +16,7 @@ class ServiceRequest extends Model
         'title',
         'description',
         'status',
+        'feedback',
         'type',
     ];
 

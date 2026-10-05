@@ -72,10 +72,12 @@ class ServiceRequestController extends Controller
 
         $request->validate([
             'status' => ['required', 'string', 'in:pending,reviewed,converted,rejected'],
+            'feedback' => ['nullable', 'string'],
         ]);
 
         $serviceRequest->update([
             'status' => $request->status,
+            'feedback' => $request->feedback,
         ]);
 
         return back()->with('success', 'Service request status updated.');
@@ -96,6 +98,7 @@ class ServiceRequestController extends Controller
             'description' => ['nullable', 'string'],
             'type' => ['required', 'string', 'in:project,task'],
             'project_id' => ['required_if:type,task', 'nullable', 'exists:projects,id'],
+            'feedback' => ['nullable', 'string'],
         ]);
 
         if ($request->type === 'project') {
@@ -118,6 +121,7 @@ class ServiceRequestController extends Controller
 
         $serviceRequest->update([
             'status' => 'converted',
+            'feedback' => $request->feedback,
         ]);
 
         return back()->with('success', 'Service request converted successfully.');
