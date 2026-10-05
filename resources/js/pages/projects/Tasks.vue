@@ -52,7 +52,7 @@ const canApproveTask = (task: any) => {
 
 const updateTaskStatus = (task: any, status: string) => {
     if (task.status === status) return;
-    
+
     router.patch(`/workspaces/${props.workspace.slug}/projects/${props.project.slug}/tasks/${task.id}`, {
         status,
     }, {
@@ -162,7 +162,7 @@ const getStatusColor = (status: string) => {
                                 {{ task.milestone.title }}
                             </span>
                             <span v-if="task.due_date">Due {{ new Date(task.due_date).toLocaleDateString() }}</span>
-                            
+
                             <span v-if="task.requires_approval" class="inline-flex items-center gap-1 ml-2">
                                 <span v-if="task.approval_status === 'pending'" class="text-amber-500 font-medium">Pending Approval</span>
                                 <span v-else-if="task.approval_status === 'approved'" class="text-emerald-500 font-medium">Approved</span>

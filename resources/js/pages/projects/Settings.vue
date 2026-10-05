@@ -97,7 +97,7 @@ const submit = () => {
                         />
                         <InputError class="mt-2" :message="form.errors.description" />
                     </div>
-                    
+
                     <div class="grid gap-2">
                         <Label for="status">Status</Label>
                         <select

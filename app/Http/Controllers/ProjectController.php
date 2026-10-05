@@ -20,9 +20,9 @@ class ProjectController extends Controller
         }
 
         $canManage = Gate::allows('manage-workspace', $workspace);
-        
+
         $query = $workspace->projects()->latest();
-        
+
         if (!$canManage) {
             $query->where('client_id', $request->user()->id);
         }

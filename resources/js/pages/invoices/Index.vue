@@ -53,7 +53,7 @@ const stats = computed(() => {
     const total = props.invoices.length;
     const paid = props.invoices.filter(i => i.status === 'paid').reduce((sum, i) => sum + parseFloat(i.total), 0);
     const outstanding = props.invoices.filter(i => ['draft', 'sent', 'overdue'].includes(i.status)).reduce((sum, i) => sum + parseFloat(i.total), 0);
-    
+
     return { total, paid, outstanding };
 });
 </script>

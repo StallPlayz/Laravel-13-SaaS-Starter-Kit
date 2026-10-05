@@ -53,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/workspaces/{workspace:slug}/settings/appearance', [WorkspaceController::class, 'appearance'])->name('workspaces.settings.appearance');
     Route::put('/workspaces/{workspace:slug}', [WorkspaceController::class, 'update'])->name('workspaces.update');
     Route::post('/workspaces/{workspace:slug}/invitations', [WorkspaceInvitationController::class, 'store'])->name('workspaces.invitations.store');
-    
+
     Route::get('/workspaces/{workspace:slug}/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/workspaces/{workspace:slug}/projects/create', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/workspaces/{workspace:slug}/projects', [ProjectController::class, 'store'])->name('projects.store');
