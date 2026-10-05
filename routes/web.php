@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/workspaces/{workspace:slug}/service-requests', [ServiceRequestController::class, 'index'])->name('service-requests.index');
     Route::post('/workspaces/{workspace:slug}/service-requests', [ServiceRequestController::class, 'store'])->name('service-requests.store');
     Route::patch('/workspaces/{workspace:slug}/service-requests/{serviceRequest}/status', [ServiceRequestController::class, 'updateStatus'])->name('service-requests.updateStatus');
+    Route::post('/workspaces/{workspace:slug}/service-requests/{serviceRequest}/convert', [ServiceRequestController::class, 'convert'])->name('service-requests.convert');
 
     Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
     Route::post('/user/support-pin', [SupportPinController::class, 'store'])->name('user.support-pin.store');
