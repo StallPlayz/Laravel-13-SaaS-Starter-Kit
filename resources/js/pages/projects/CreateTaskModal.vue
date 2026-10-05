@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
+import { ref, computed } from 'vue';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,10 +17,15 @@ import {
 const props = defineProps<{
     workspace: any;
     project: any;
+    members: any[];
     show: boolean;
 }>();
 
 const emit = defineEmits(['close']);
+
+const page = usePage();
+const currentRole = computed(() => page.props.auth.currentRole as string);
+const canAssign = computed(() => currentRole.value === 'owner' || currentRole.value === 'admin');
 
 const form = useForm({
     title: '',
@@ -28,6 +33,7 @@ const form = useForm({
     status: 'todo',
     priority: 'medium',
     due_date: '',
+    assignee_id: '',
 });
 
 const submit = () => {
@@ -115,6 +121,21 @@ const submit = () => {
                         type="date"
                     />
                     <InputError :message="form.errors.due_date" />
+                </div>
+
+                <div class="grid gap-2" v-if="canAssign">
+                    <Label for="assignee_id">Assign To</Label>
+                    <select
+                        id="assignee_id"
+                        v-model="form.assignee_id"
+                        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <option value="">Unassigned</option>
+                        <option v-for="member in members" :key="member.id" :value="member.id">
+                            {{ member.name }}
+                        </option>
+                    </select>
+                    <InputError :message="form.errors.assignee_id" />
                 </div>
 
                 <DialogFooter class="pt-4">

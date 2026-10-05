@@ -112,10 +112,12 @@ class ProjectController extends Controller
         }
 
         $project->load(['tasks.assignee', 'tasks.milestone', 'milestones']);
+        $members = $workspace->users()->get(['users.id', 'users.name', 'users.email']);
 
         return Inertia::render('projects/Tasks', [
             'workspace' => $workspace,
             'project' => $project,
+            'members' => $members,
         ]);
     }
 
@@ -129,13 +131,21 @@ class ProjectController extends Controller
             abort(404);
         }
 
-        $request->validate([
+        $canManage = Gate::allows('manage-workspace', $workspace);
+
+        $rules = [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', 'string', 'in:todo,in_progress,review,done'],
             'priority' => ['required', 'string', 'in:low,medium,high,urgent'],
             'due_date' => ['nullable', 'date'],
-        ]);
+        ];
+
+        if ($canManage) {
+            $rules['assignee_id'] = ['nullable', 'exists:users,id'];
+        }
+
+        $request->validate($rules);
 
         $project->tasks()->create([
             'title' => $request->title,
@@ -143,7 +153,7 @@ class ProjectController extends Controller
             'status' => $request->status,
             'priority' => $request->priority,
             'due_date' => $request->due_date,
-            'assignee_id' => $request->user()->id, // Auto-assign to creator for now
+            'assignee_id' => $canManage ? $request->assignee_id : $request->user()->id,
         ]);
 
         return back()->with('success', 'Task created successfully.');

@@ -16,6 +16,7 @@ import { index, show, tasks } from '@/routes/projects';
 const props = defineProps<{
     workspace: any;
     project: any;
+    members: any[];
 }>();
 
 setLayoutProps({
@@ -203,6 +204,7 @@ const getStatusColor = (status: string) => {
             :show="showCreateModal"
             :workspace="workspace"
             :project="project"
+            :members="members"
             @close="showCreateModal = false"
         />
     </div>
