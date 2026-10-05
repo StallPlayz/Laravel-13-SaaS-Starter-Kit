@@ -10,6 +10,7 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\PublicWorkspaceController;
+use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SupportPinController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceInvitationController;
@@ -70,6 +71,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/workspaces/{workspace:slug}/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/workspaces/{workspace:slug}/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
     Route::patch('/workspaces/{workspace:slug}/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
+
+    Route::get('/workspaces/{workspace:slug}/service-requests', [ServiceRequestController::class, 'index'])->name('service-requests.index');
+    Route::post('/workspaces/{workspace:slug}/service-requests', [ServiceRequestController::class, 'store'])->name('service-requests.store');
+    Route::patch('/workspaces/{workspace:slug}/service-requests/{serviceRequest}/status', [ServiceRequestController::class, 'updateStatus'])->name('service-requests.updateStatus');
 
     Route::get('/directory', [WorkspaceMemberController::class, 'index'])->name('directory');
     Route::post('/user/support-pin', [SupportPinController::class, 'store'])->name('user.support-pin.store');

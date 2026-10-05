@@ -8,6 +8,7 @@ import {
     Settings,
     LifeBuoy,
     Headset,
+    Inbox,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import NavMain from '@/components/NavMain.vue';
@@ -34,9 +35,13 @@ const mainNavItems = computed<NavItem[]>(() => {
     const invoicesUrl = workspace
         ? `/workspaces/${workspace.slug}/invoices`
         : '/dashboard';
+    const requestsUrl = workspace
+        ? `/workspaces/${workspace.slug}/service-requests`
+        : '/dashboard';
 
     return [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+        { title: 'Service Requests', href: requestsUrl, icon: Inbox },
         { title: 'Projects', href: projectsUrl, icon: Briefcase },
         { title: 'Invoices', href: invoicesUrl, icon: Receipt },
         { title: 'Directory', href: '/directory', icon: Users },

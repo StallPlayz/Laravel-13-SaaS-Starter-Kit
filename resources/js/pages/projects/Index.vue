@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { setLayoutProps } from '@inertiajs/vue3';
 import { Plus, FolderKanban } from '@lucide/vue';
+import { computed } from 'vue';
 import { index } from '@/routes/projects';
 
 const props = defineProps<{
@@ -17,6 +18,10 @@ setLayoutProps({
         },
     ],
 });
+
+const page = usePage();
+const currentRole = computed(() => page.props.auth.currentRole as string);
+const canManage = computed(() => currentRole.value === 'owner' || currentRole.value === 'admin');
 </script>
 
 <template>
@@ -29,6 +34,7 @@ setLayoutProps({
                 <p class="text-sm text-muted-foreground mt-1">Manage your workspace initiatives and repositories.</p>
             </div>
             <Link
+                v-if="canManage"
                 :href="`/workspaces/${workspace.slug}/projects/create`"
                 class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
             >
@@ -43,9 +49,10 @@ setLayoutProps({
             </div>
             <h3 class="text-lg font-medium">No projects yet</h3>
             <p class="text-sm text-muted-foreground mt-1 mb-4 max-w-sm">
-                Get started by creating your first project to organize your team's work.
+                {{ canManage ? "Get started by creating your first project to organize your team's work." : "You don't have any projects assigned to you yet." }}
             </p>
             <Link
+                v-if="canManage"
                 :href="`/workspaces/${workspace.slug}/projects/create`"
                 class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
             >

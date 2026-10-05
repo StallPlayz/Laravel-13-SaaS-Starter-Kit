@@ -57,6 +57,12 @@ class Workspace extends Model
         return $this->hasMany(Invoice::class);
     }
 
+    /** @return HasMany<ServiceRequest, $this> */
+    public function serviceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
+
     protected static function booted(): void
     {
         static::saved(function () {

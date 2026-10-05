@@ -7,6 +7,7 @@ import {
     CreditCard,
     LifeBuoy,
     Headset,
+    Inbox,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -32,11 +33,19 @@ const mainNavItems = computed<NavItem[]>(() => {
     const invoicesUrl = workspace
         ? `/workspaces/${workspace.slug}/invoices`
         : '/dashboard';
+    const requestsUrl = workspace
+        ? `/workspaces/${workspace.slug}/service-requests`
+        : '/dashboard';
 
     const items: NavItem[] = [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
-        { title: 'My Projects', href: projectsUrl, icon: Folder },
     ];
+
+    if (currentRole.value === 'client') {
+        items.push({ title: 'Service Requests', href: requestsUrl, icon: Inbox });
+    }
+
+    items.push({ title: 'My Projects', href: projectsUrl, icon: Folder });
 
     if (currentRole.value === 'member') {
         // TODO: Implement a global "My Tasks" view later

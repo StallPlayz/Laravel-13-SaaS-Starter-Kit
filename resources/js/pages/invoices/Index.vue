@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { setLayoutProps } from '@inertiajs/vue3';
 import { Plus, Receipt, FileText, CheckCircle2, Clock, AlertCircle, XCircle } from '@lucide/vue';
 import { computed } from 'vue';
@@ -17,6 +17,10 @@ setLayoutProps({
         },
     ],
 });
+
+const page = usePage();
+const currentRole = computed(() => page.props.auth.currentRole as string);
+const canManage = computed(() => currentRole.value === 'owner' || currentRole.value === 'admin');
 
 const getStatusIcon = (status: string) => {
     switch (status) {
@@ -64,6 +68,7 @@ const stats = computed(() => {
                 <p class="text-sm text-muted-foreground mt-1">Manage your billing and payments.</p>
             </div>
             <Link
+                v-if="canManage"
                 :href="`/workspaces/${workspace.slug}/invoices/create`"
                 class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
             >
@@ -102,9 +107,10 @@ const stats = computed(() => {
             </div>
             <h3 class="text-lg font-medium">No invoices yet</h3>
             <p class="text-sm text-muted-foreground mt-1 mb-4 max-w-sm">
-                Get started by creating your first invoice to bill your clients.
+                {{ canManage ? "Get started by creating your first invoice to bill your clients." : "You don't have any invoices yet." }}
             </p>
             <Link
+                v-if="canManage"
                 :href="`/workspaces/${workspace.slug}/invoices/create`"
                 class="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
             >
