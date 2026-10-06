@@ -34,6 +34,7 @@ const form = useForm({
     priority: 'medium',
     due_date: '',
     assignee_id: '',
+    collaborator_ids: [] as number[],
 });
 
 const submit = () => {
@@ -124,7 +125,7 @@ const submit = () => {
                 </div>
 
                 <div class="grid gap-2" v-if="canAssign">
-                    <Label for="assignee_id">Assign To</Label>
+                    <Label for="assignee_id">Assign To (Primary)</Label>
                     <select
                         id="assignee_id"
                         v-model="form.assignee_id"
@@ -136,6 +137,22 @@ const submit = () => {
                         </option>
                     </select>
                     <InputError :message="form.errors.assignee_id" />
+                </div>
+
+                <div class="grid gap-2" v-if="canAssign">
+                    <Label for="collaborator_ids">Collaborators</Label>
+                    <select
+                        id="collaborator_ids"
+                        v-model="form.collaborator_ids"
+                        multiple
+                        class="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <option v-for="member in members" :key="member.id" :value="member.id">
+                            {{ member.name }}
+                        </option>
+                    </select>
+                    <p class="text-xs text-muted-foreground">Hold Ctrl/Cmd to select multiple.</p>
+                    <InputError :message="form.errors.collaborator_ids" />
                 </div>
 
                 <DialogFooter class="pt-4">

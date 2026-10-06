@@ -24,7 +24,9 @@ class ProjectController extends Controller
         $query = $workspace->projects()->latest();
 
         if (!$canManage) {
-            $query->where('client_id', $request->user()->id);
+            $query->whereHas('users', function ($q) use ($request) {
+                $q->where('users.id', $request->user()->id);
+            });
         }
 
         $projects = $query->get();
@@ -41,11 +43,11 @@ class ProjectController extends Controller
             abort(403);
         }
 
-        $clients = $workspace->users()->wherePivot('role', 'client')->get();
+        $users = $workspace->users()->get();
 
         return Inertia::render('projects/Create', [
             'workspace' => $workspace,
-            'clients' => $clients,
+            'users' => $users,
         ]);
     }
 
@@ -59,16 +61,20 @@ class ProjectController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'alpha_dash', 'max:255', 'unique:projects,slug,NULL,id,workspace_id,' . $workspace->id],
             'description' => ['nullable', 'string', 'max:1000'],
-            'client_id' => ['nullable', 'exists:users,id'],
+            'user_ids' => ['nullable', 'array'],
+            'user_ids.*' => ['exists:users,id'],
         ]);
 
         $project = $workspace->projects()->create([
             'name' => $request->name,
             'slug' => $request->slug,
             'description' => $request->description,
-            'client_id' => $request->client_id,
             'status' => 'active',
         ]);
+
+        if ($request->has('user_ids')) {
+            $project->users()->sync($request->user_ids);
+        }
 
         return redirect()->route('projects.show', ['workspace' => $workspace->slug, 'project' => $project->slug]);
     }
@@ -84,11 +90,11 @@ class ProjectController extends Controller
         }
 
         $canManage = Gate::allows('manage-workspace', $workspace);
-        if (!$canManage && $project->client_id !== $request->user()->id) {
+        if (!$canManage && !$project->users()->where('users.id', $request->user()->id)->exists()) {
             abort(403, 'You can only view your own projects.');
         }
 
-        $project->load(['tasks', 'milestones']);
+        $project->load(['tasks', 'milestones', 'users']);
 
         return Inertia::render('projects/Show', [
             'workspace' => $workspace,
@@ -107,11 +113,11 @@ class ProjectController extends Controller
         }
 
         $canManage = Gate::allows('manage-workspace', $workspace);
-        if (!$canManage && $project->client_id !== $request->user()->id) {
+        if (!$canManage && !$project->users()->where('users.id', $request->user()->id)->exists()) {
             abort(403, 'You can only view tasks for your own projects.');
         }
 
-        $project->load(['tasks.assignee', 'tasks.milestone', 'milestones']);
+        $project->load(['tasks.assignee', 'tasks.collaborators', 'tasks.milestone', 'milestones']);
         $members = $workspace->users()->get(['users.id', 'users.name', 'users.email']);
 
         return Inertia::render('projects/Tasks', [
@@ -139,6 +145,8 @@ class ProjectController extends Controller
             'status' => ['required', 'string', 'in:todo,in_progress,review,done'],
             'priority' => ['required', 'string', 'in:low,medium,high,urgent'],
             'due_date' => ['nullable', 'date'],
+            'collaborator_ids' => ['nullable', 'array'],
+            'collaborator_ids.*' => ['exists:users,id'],
         ];
 
         if ($canManage) {
@@ -147,7 +155,7 @@ class ProjectController extends Controller
 
         $request->validate($rules);
 
-        $project->tasks()->create([
+        $task = $project->tasks()->create([
             'title' => $request->title,
             'description' => $request->description,
             'status' => $request->status,
@@ -155,6 +163,10 @@ class ProjectController extends Controller
             'due_date' => $request->due_date,
             'assignee_id' => $canManage ? $request->assignee_id : $request->user()->id,
         ]);
+
+        if ($request->has('collaborator_ids')) {
+            $task->collaborators()->sync($request->collaborator_ids);
+        }
 
         return back()->with('success', 'Task created successfully.');
     }
@@ -170,14 +182,19 @@ class ProjectController extends Controller
         }
 
         $canManage = Gate::allows('manage-workspace', $workspace);
-        if (!$canManage && $task->assignee_id !== $request->user()->id) {
-            abort(403, 'You can only update tasks assigned to you.');
+        $isAssignee = $task->assignee_id === $request->user()->id;
+        $isCollaborator = $task->collaborators()->where('users.id', $request->user()->id)->exists();
+
+        if (!$canManage && !$isAssignee && !$isCollaborator) {
+            abort(403, 'You can only update tasks assigned to you or that you are collaborating on.');
         }
 
         $request->validate([
             'status' => ['sometimes', 'required', 'string', 'in:todo,in_progress,review,done'],
             'requires_approval' => ['sometimes', 'boolean'],
             'approval_status' => ['sometimes', 'required', 'string', 'in:pending,approved,rejected'],
+            'collaborator_ids' => ['sometimes', 'array'],
+            'collaborator_ids.*' => ['exists:users,id'],
         ]);
 
         $updates = [];
@@ -193,6 +210,10 @@ class ProjectController extends Controller
 
         $task->update($updates);
 
+        if ($request->has('collaborator_ids')) {
+            $task->collaborators()->sync($request->collaborator_ids);
+        }
+
         return back()->with('success', 'Task updated successfully.');
     }
 
@@ -206,9 +227,9 @@ class ProjectController extends Controller
             abort(404);
         }
 
-        // Only the assigned client can approve/reject
-        if ($project->client_id !== $request->user()->id) {
-            abort(403, 'Only the client assigned to this project can approve tasks.');
+        // Only clients assigned to the project can approve/reject
+        if (!$project->users()->where('users.id', $request->user()->id)->wherePivot('role', 'client')->exists()) {
+            abort(403, 'Only clients assigned to this project can approve tasks.');
         }
 
         $request->validate([

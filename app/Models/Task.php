@@ -39,6 +39,13 @@ class Task extends Model
         return $this->belongsTo(User::class, 'assignee_id');
     }
 
+    public function collaborators(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'task_collaborators')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
+
     public function milestone(): BelongsTo
     {
         return $this->belongsTo(Milestone::class);

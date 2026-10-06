@@ -18,7 +18,6 @@ class Project extends Model
      */
     protected $fillable = [
         'workspace_id',
-        'client_id',
         'name',
         'slug',
         'description',
@@ -34,11 +33,11 @@ class Project extends Model
     }
 
     /**
-     * Get the client assigned to the project.
+     * Get the users (members and clients) assigned to the project.
      */
-    public function client(): BelongsTo
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsToMany(User::class, 'project_user')->withTimestamps();
     }
 
     /**

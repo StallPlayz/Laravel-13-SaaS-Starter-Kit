@@ -44,7 +44,9 @@ const canUpdateTask = (task: any) => {
     if (currentRole.value === 'owner' || currentRole.value === 'admin') {
         return true;
     }
-    return task.assignee_id === currentUser.value.id;
+    const isAssignee = task.assignee_id === currentUser.value.id;
+    const isCollaborator = task.collaborators?.some((c: any) => c.id === currentUser.value.id);
+    return isAssignee || isCollaborator;
 };
 
 const canApproveTask = (task: any) => {
@@ -190,7 +192,12 @@ const getStatusColor = (status: string) => {
                         }">
                         {{ task.priority }}
                     </span>
-                    <div v-if="task.assignee" class="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium" :title="task.assignee.name">
+                    <div class="flex -space-x-2 overflow-hidden mr-2" v-if="task.collaborators && task.collaborators.length > 0">
+                        <div v-for="collaborator in task.collaborators" :key="collaborator.id" class="inline-block h-8 w-8 rounded-full ring-2 ring-background bg-muted flex items-center justify-center text-xs font-medium" :title="collaborator.name">
+                            {{ collaborator.name.charAt(0) }}
+                        </div>
+                    </div>
+                    <div v-if="task.assignee" class="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-medium ring-2 ring-background z-10" :title="`Assignee: ${task.assignee.name}`">
                         {{ task.assignee.name.charAt(0) }}
                     </div>
                     <div v-else class="h-8 w-8 rounded-full border border-dashed flex items-center justify-center text-xs text-muted-foreground" title="Unassigned">
