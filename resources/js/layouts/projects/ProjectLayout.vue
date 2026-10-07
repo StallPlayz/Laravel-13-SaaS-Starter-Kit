@@ -9,11 +9,13 @@ import { computed } from 'vue';
 const page = usePage();
 const workspace = computed(() => page.props.workspace as any);
 const project = computed(() => page.props.project as any);
+const currentRole = computed(() => page.props.auth.currentRole as string);
+const canManage = computed(() => currentRole.value === 'owner' || currentRole.value === 'admin');
 
 const navItems = computed<NavItem[]>(() => {
     if (!workspace.value || !project.value) return [];
     
-    return [
+    const items: NavItem[] = [
         {
             title: 'Overview',
             href: `/workspaces/${workspace.value.slug}/projects/${project.value.slug}`,
@@ -22,11 +24,16 @@ const navItems = computed<NavItem[]>(() => {
             title: 'Tasks',
             href: `/workspaces/${workspace.value.slug}/projects/${project.value.slug}/tasks`,
         },
-        {
+    ];
+
+    if (canManage.value) {
+        items.push({
             title: 'Settings',
             href: `/workspaces/${workspace.value.slug}/projects/${project.value.slug}/settings`,
-        },
-    ];
+        });
+    }
+
+    return items;
 });
 
 const { isCurrentUrl } = useCurrentUrl();
