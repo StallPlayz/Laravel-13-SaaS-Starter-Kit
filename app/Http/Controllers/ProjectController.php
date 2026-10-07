@@ -267,12 +267,13 @@ class ProjectController extends Controller
             abort(404);
         }
 
-        $clients = $workspace->users()->wherePivot('role', 'client')->get();
+        $users = $workspace->users()->get();
+        $project->load('users');
 
         return Inertia::render('projects/Settings', [
             'workspace' => $workspace,
             'project' => $project,
-            'clients' => $clients,
+            'users' => $users,
         ]);
     }
 
@@ -291,7 +292,8 @@ class ProjectController extends Controller
             'slug' => ['required', 'string', 'alpha_dash', 'max:255', 'unique:projects,slug,' . $project->id . ',id,workspace_id,' . $workspace->id],
             'description' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', 'string', 'in:active,paused,completed,archived'],
-            'client_id' => ['nullable', 'exists:users,id'],
+            'user_ids' => ['nullable', 'array'],
+            'user_ids.*' => ['exists:users,id'],
         ]);
 
         $project->update([
@@ -299,8 +301,11 @@ class ProjectController extends Controller
             'slug' => $request->slug,
             'description' => $request->description,
             'status' => $request->status,
-            'client_id' => $request->client_id,
         ]);
+
+        if ($request->has('user_ids')) {
+            $project->users()->sync($request->user_ids);
+        }
 
         return back()->with('success', 'Project updated successfully.');
     }

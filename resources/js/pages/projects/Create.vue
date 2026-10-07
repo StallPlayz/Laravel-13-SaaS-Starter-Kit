@@ -11,7 +11,7 @@ import { index, create } from '@/routes/projects';
 
 const props = defineProps<{
     workspace: any;
-    clients: any[];
+    users: any[];
 }>();
 
 setLayoutProps({
@@ -33,7 +33,7 @@ const form = useForm({
     name: '',
     slug: '',
     description: '',
-    client_id: '',
+    user_ids: [] as number[],
 });
 
 const submit = () => {
@@ -95,19 +95,20 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="client_id">Assign Client (Optional)</Label>
+                        <Label for="user_ids">Assign Members & Clients (Optional)</Label>
                         <select
-                            id="client_id"
-                            v-model="form.client_id"
+                            id="user_ids"
+                            v-model="form.user_ids"
                             :disabled="isReadOnly"
-                            class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            multiple
+                            class="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <option value="">No Client</option>
-                            <option v-for="client in clients" :key="client.id" :value="client.id">
-                                {{ client.name }} ({{ client.email }})
+                            <option v-for="user in users" :key="user.id" :value="user.id">
+                                {{ user.name }} ({{ user.email }})
                             </option>
                         </select>
-                        <InputError class="mt-2" :message="form.errors.client_id" />
+                        <p class="text-xs text-muted-foreground">Hold Ctrl/Cmd to select multiple users.</p>
+                        <InputError class="mt-2" :message="form.errors.user_ids" />
                     </div>
                 </div>
             </div>
