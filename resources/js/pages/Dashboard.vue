@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { Building2 } from '@lucide/vue';
+import { Head, Link, usePage, router } from '@inertiajs/vue3';
+import { Building2, ArrowRight, CheckSquare, Inbox, CreditCard } from '@lucide/vue';
 import { computed } from 'vue';
 import { dashboard } from '@/routes';
 
@@ -8,7 +8,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Dashboard',
+                title: 'Global Dashboard',
                 href: dashboard(),
             },
         ],
@@ -19,38 +19,106 @@ const page = usePage();
 const availableWorkspaces = computed(
     () => page.props.auth.availableWorkspaces || [],
 );
+
+const switchWorkspace = (workspaceId: number) => {
+    router.post(
+        '/workspaces/switch',
+        { workspace_id: workspaceId },
+        {
+            preserveScroll: true,
+            preserveState: false,
+        },
+    );
+};
 </script>
 
 <template>
-    <Head title="Dashboard" />
-    <div
-        class="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center"
-    >
-        <div v-if="availableWorkspaces.length === 0" class="max-w-md space-y-6">
-            <div class="flex justify-center">
-                <div class="rounded-full bg-primary/10 p-4">
-                    <Building2 class="h-12 w-12 text-primary" />
+    <Head title="Global Dashboard" />
+    <div class="p-8">
+        <div v-if="availableWorkspaces.length === 0" class="flex min-h-[60vh] flex-col items-center justify-center text-center">
+            <div class="max-w-md space-y-6">
+                <div class="flex justify-center">
+                    <div class="rounded-full bg-primary/10 p-4">
+                        <Building2 class="h-12 w-12 text-primary" />
+                    </div>
                 </div>
-            </div>
-            <h1 class="text-3xl font-bold">Welcome to SyncDesk</h1>
-            <p class="text-muted-foreground">
-                You don't belong to any agencies yet. To get started, you can
-                either create your own agency workspace, or wait for an
-                invitation from an existing team.
-            </p>
-            <div class="pt-4">
-                <Link
-                    href="/workspaces/create"
-                    class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-background shadow transition-colors hover:bg-primary/90"
-                >
-                    Create New Workspace
-                </Link>
+                <h1 class="text-3xl font-bold">Welcome to SyncDesk</h1>
+                <p class="text-muted-foreground">
+                    You don't belong to any agencies yet. To get started, you can
+                    either create your own agency workspace, or wait for an
+                    invitation from an existing team.
+                </p>
+                <div class="pt-4">
+                    <Link
+                        href="/workspaces/create"
+                        class="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-background shadow transition-colors hover:bg-primary/90"
+                    >
+                        Create New Workspace
+                    </Link>
+                </div>
             </div>
         </div>
 
-        <div v-else class="w-full text-left">
-            <h1 class="mb-4 text-2xl font-bold">Workspace Dashboard</h1>
-            <p>Welcome back! You are viewing data for your active agency.</p>
+        <div v-else class="w-full max-w-6xl mx-auto">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold tracking-tight text-foreground">Welcome back, {{ page.props.auth.user.name }}</h1>
+                <p class="text-sm text-muted-foreground mt-1">Here is an overview of your activity across all your workspaces.</p>
+            </div>
+
+            <div class="grid gap-8 md:grid-cols-3">
+                <!-- Unified Command Center -->
+                <div class="md:col-span-2 space-y-8">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+                        <div class="p-6 border-b flex items-center gap-2">
+                            <CheckSquare class="w-5 h-5 text-primary" />
+                            <h3 class="font-semibold text-lg">My Tasks</h3>
+                        </div>
+                        <div class="p-6 text-center text-sm text-muted-foreground">
+                            Global task aggregation will be implemented here.
+                        </div>
+                    </div>
+
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
+                        <div class="p-6 border-b flex items-center gap-2">
+                            <Inbox class="w-5 h-5 text-primary" />
+                            <h3 class="font-semibold text-lg">Pending Approvals</h3>
+                        </div>
+                        <div class="p-6 text-center text-sm text-muted-foreground">
+                            Global approvals aggregation will be implemented here.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workspace Grid -->
+                <div class="space-y-6">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-semibold text-lg">Your Workspaces</h3>
+                        <Link href="/workspaces/create" class="text-sm text-primary hover:underline">
+                            Create New
+                        </Link>
+                    </div>
+                    
+                    <div class="grid gap-4">
+                        <button
+                            v-for="workspace in availableWorkspaces"
+                            :key="workspace.id"
+                            @click="switchWorkspace(workspace.id)"
+                            class="flex items-center justify-between p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all text-left group"
+                        >
+                            <div class="flex items-center gap-4">
+                                <div class="flex aspect-square size-10 items-center justify-center rounded-lg bg-primary/10 text-primary font-bold">
+                                    {{ workspace.name.charAt(0) }}
+                                </div>
+                                <div>
+                                    <p class="font-semibold group-hover:text-primary transition-colors">{{ workspace.name }}</p>
+                                    <p class="text-xs text-muted-foreground capitalize">{{ (workspace as any).pivot?.role || 'Member' }}</p>
+                                </div>
+                            </div>
+                            <ArrowRight class="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>

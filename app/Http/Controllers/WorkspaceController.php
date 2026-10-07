@@ -26,7 +26,7 @@ class WorkspaceController extends Controller
 
         $request->session()->put('active_workspace_id', $workspace->id);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('workspaces.dashboard', ['workspace' => $workspace->slug]);
     }
 
     public function create(): Response
@@ -59,7 +59,7 @@ class WorkspaceController extends Controller
 
         $request->session()->put('active_workspace_id', $workspace->id);
 
-        return redirect()->route('dashboard');
+        return redirect()->route('workspaces.dashboard', ['workspace' => $workspace->slug]);
     }
 
     public function settings(Workspace $workspace): Response

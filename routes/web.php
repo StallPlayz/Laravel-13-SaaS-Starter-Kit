@@ -13,6 +13,7 @@ use App\Http\Controllers\PublicWorkspaceController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\SupportPinController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceDashboardController;
 use App\Http\Controllers\WorkspaceInvitationController;
 use App\Http\Controllers\WorkspaceMemberController;
 use App\Http\Middleware\EnsureSuperAdmin;
@@ -49,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/workspaces/create', [WorkspaceController::class, 'create'])->name('workspaces.create');
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
+    
+    Route::get('/workspaces/{workspace:slug}/dashboard', [WorkspaceDashboardController::class, 'index'])->name('workspaces.dashboard');
+    
     Route::get('/workspaces/{workspace:slug}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
     Route::get('/workspaces/{workspace:slug}/settings/appearance', [WorkspaceController::class, 'appearance'])->name('workspaces.settings.appearance');
     Route::put('/workspaces/{workspace:slug}', [WorkspaceController::class, 'update'])->name('workspaces.update');

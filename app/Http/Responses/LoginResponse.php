@@ -28,9 +28,12 @@ class LoginResponse implements LoginResponseContract
                     ]);
 
                     $workspaceName = $invitation->workspace->name;
+                    $workspaceSlug = $invitation->workspace->slug;
                     $invitation->delete();
 
-                    return redirect()->intended('/dashboard')
+                    $request->session()->put('active_workspace_id', $invitation->workspace_id);
+
+                    return redirect()->intended("/workspaces/{$workspaceSlug}/dashboard")
                         ->with('success', "You have successfully joined {$workspaceName}.");
                 } else {
                     Auth::logout();
@@ -44,6 +47,21 @@ class LoginResponse implements LoginResponseContract
 
         if ($user && $user->isSuperAdmin()) {
             return redirect()->intended('/admin');
+        }
+
+        $activeWorkspaceId = $request->session()->get('active_workspace_id');
+        
+        if ($activeWorkspaceId) {
+            $workspace = $user->workspaces()->find($activeWorkspaceId);
+            if ($workspace) {
+                return redirect()->intended("/workspaces/{$workspace->slug}/dashboard");
+            }
+        }
+
+        $firstWorkspace = $user->workspaces()->first();
+        if ($firstWorkspace) {
+            $request->session()->put('active_workspace_id', $firstWorkspace->id);
+            return redirect()->intended("/workspaces/{$firstWorkspace->slug}/dashboard");
         }
 
         return redirect()->intended('/dashboard');
