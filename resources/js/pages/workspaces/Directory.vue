@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { setLayoutProps } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { useReadOnly } from '@/composables/useReadOnly';
-import { directory } from '@/routes';
 
 const props = defineProps<{
     workspace: { id: number; name: string; slug: string };
@@ -16,15 +16,13 @@ const props = defineProps<{
     }>;
 }>();
 
-defineOptions({
-    layout: {
-        breadcrumbs: [
-            {
-                title: 'Directory',
-                href: directory(),
-            },
-        ],
-    },
+setLayoutProps({
+    breadcrumbs: [
+        {
+            title: 'Directory',
+            href: `/workspaces/${props.workspace.slug}/directory`,
+        },
+    ],
 });
 
 const { isReadOnly } = useReadOnly();

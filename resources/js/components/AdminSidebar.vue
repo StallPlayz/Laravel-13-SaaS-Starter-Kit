@@ -34,13 +34,16 @@ const mainNavItems = computed<NavItem[]>(() => {
     const requestsUrl = workspace
         ? `/workspaces/${workspace.slug}/service-requests`
         : '/dashboard';
+    const directoryUrl = workspace
+        ? `/workspaces/${workspace.slug}/directory`
+        : '/dashboard';
 
     return [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
         { title: 'Service Requests', href: requestsUrl, icon: Inbox },
         { title: 'Projects', href: projectsUrl, icon: Briefcase },
         { title: 'Invoices', href: invoicesUrl, icon: Receipt },
-        { title: 'Team & Clients', href: '/directory', icon: Users },
+        { title: 'Team & Clients', href: directoryUrl, icon: Users },
     ];
 });
 

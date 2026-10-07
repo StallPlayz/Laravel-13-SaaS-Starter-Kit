@@ -12,26 +12,18 @@ use Inertia\Response;
 
 class WorkspaceMemberController extends Controller
 {
-    public function index(Request $request): RedirectResponse|Response
+    public function index(Request $request, Workspace $workspace): RedirectResponse|Response
     {
-        $activeWorkspaceId = $request->session()->get('active_workspace_id');
-
-        if (! $activeWorkspaceId) {
-            return redirect()->route('dashboard')
-                ->with('error', 'Please select a workspace to view its directory.');
-        }
-
         $user = $request->user();
         $isGhostMode = $request->session()->has('ghost_workspace_id');
 
         if ($isGhostMode && $user->isSuperAdmin()) {
-            /** @var Workspace $workspace */
-            $workspace = Workspace::findOrFail($activeWorkspaceId);
+            // Super admin in ghost mode can view any workspace directory
         } else {
-            /** @var Workspace $workspace */
-            $workspace = $user->workspaces()
-                ->where('workspaces.id', $activeWorkspaceId)
-                ->firstOrFail();
+            // Ensure the user belongs to this workspace
+            if (!$user->workspaces()->where('workspaces.id', $workspace->id)->exists()) {
+                abort(403);
+            }
         }
 
         return Inertia::render('workspaces/Directory', [

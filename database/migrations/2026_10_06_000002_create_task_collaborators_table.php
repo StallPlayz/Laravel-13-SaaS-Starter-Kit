@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('status')->default('pending'); // pending, approved, rejected
             $table->timestamps();
-            
+
             $table->unique(['task_id', 'user_id']);
         });
     }
