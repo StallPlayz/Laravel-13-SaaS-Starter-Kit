@@ -8,6 +8,7 @@ import {
     LifeBuoy,
     Headset,
     Inbox,
+    CheckCircle,
 } from '@lucide/vue';
 import { computed } from 'vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -36,6 +37,9 @@ const mainNavItems = computed<NavItem[]>(() => {
     const requestsUrl = workspace
         ? `/workspaces/${workspace.slug}/service-requests`
         : '/dashboard';
+    const approvalsUrl = workspace
+        ? `/workspaces/${workspace.slug}/approvals`
+        : '/dashboard';
 
     const items: NavItem[] = [
         { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
@@ -43,6 +47,7 @@ const mainNavItems = computed<NavItem[]>(() => {
 
     if (currentRole.value === 'client') {
         items.push({ title: 'Service Requests', href: requestsUrl, icon: Inbox });
+        items.push({ title: 'Approvals', href: approvalsUrl, icon: CheckCircle });
     }
 
     items.push({ title: 'My Projects', href: projectsUrl, icon: Folder });

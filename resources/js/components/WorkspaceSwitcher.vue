@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage, router } from '@inertiajs/vue3';
-import { ChevronsUpDown, Check, Plus, Settings } from '@lucide/vue';
+import { ChevronsUpDown, Check, Plus, Settings, Home } from '@lucide/vue';
 import { computed } from 'vue';
 import {
     DropdownMenu,
@@ -75,7 +75,23 @@ const switchWorkspace = (workspaceId: number) => {
 
                     <DropdownMenuItem as-child>
                         <Link
-                            :href="`/workspaces/${activeWorkspace?.id}/settings`"
+                            href="/dashboard"
+                            class="flex w-full cursor-pointer items-center gap-2 p-2"
+                        >
+                            <div
+                                class="flex size-6 items-center justify-center rounded-md border bg-background"
+                            >
+                                <Home class="size-4" />
+                            </div>
+                            <div class="font-medium text-muted-foreground">
+                                Global Dashboard
+                            </div>
+                        </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem as-child>
+                        <Link
+                            :href="`/workspaces/${activeWorkspace?.slug}/settings`"
                             class="flex w-full cursor-pointer items-center gap-2 p-2"
                         >
                             <div
