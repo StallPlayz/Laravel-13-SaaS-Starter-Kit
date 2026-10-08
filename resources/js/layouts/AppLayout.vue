@@ -7,6 +7,7 @@ import AdminSidebarLayout from '@/layouts/app/AdminSidebarLayout.vue';
 import MemberClientSidebarLayout from '@/layouts/app/MemberClientSidebarLayout.vue';
 import OwnerSidebarLayout from '@/layouts/app/OwnerSidebarLayout.vue';
 import PlatformAdminLayout from '@/layouts/app/PlatformAdminLayout.vue';
+import GlobalSidebarLayout from '@/layouts/app/GlobalSidebarLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 
 const { breadcrumbs = [] } = defineProps<{
@@ -32,9 +33,14 @@ watch(
 const LayoutComponent = computed(() => {
     const user = page.props.auth?.user;
     const role = page.props.auth?.currentRole;
+    const isGlobalDashboard = page.url.startsWith('/dashboard') || page.url.startsWith('/settings');
 
     if (user?.platform_role === 'super_admin' && !role) {
         return PlatformAdminLayout;
+    }
+
+    if (isGlobalDashboard) {
+        return GlobalSidebarLayout;
     }
 
     switch (role) {
@@ -46,7 +52,7 @@ const LayoutComponent = computed(() => {
         case 'client':
             return MemberClientSidebarLayout;
         default:
-            return MemberClientSidebarLayout;
+            return GlobalSidebarLayout;
     }
 });
 </script>
