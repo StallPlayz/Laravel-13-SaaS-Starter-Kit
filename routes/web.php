@@ -47,6 +47,9 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [GlobalDashboardController::class, 'index'])->name('dashboard');
+    Route::get('my-tasks', [GlobalDashboardController::class, 'myTasks'])->name('my-tasks');
+    Route::get('notifications', [GlobalDashboardController::class, 'notifications'])->name('notifications');
+    Route::post('notifications/{id}/read', [GlobalDashboardController::class, 'markNotificationAsRead'])->name('notifications.read');
     Route::post('/workspaces/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
 
     Route::get('/workspaces/create', [WorkspaceController::class, 'create'])->name('workspaces.create');

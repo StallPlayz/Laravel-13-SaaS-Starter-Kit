@@ -47,4 +47,42 @@ class GlobalDashboardController extends Controller
             'pendingApprovals' => $pendingApprovals,
         ]);
     }
+
+    public function myTasks(Request $request): Response
+    {
+        $user = $request->user();
+        
+        $myTasks = $user->tasks()
+            ->with(['project.workspace'])
+            ->latest()
+            ->get();
+
+        $collaboratorTasks = $user->collaboratorTasks()
+            ->with(['project.workspace'])
+            ->latest()
+            ->get();
+
+        $allTasks = $myTasks->concat($collaboratorTasks)->sortByDesc('created_at')->values();
+
+        return Inertia::render('MyTasks', [
+            'tasks' => $allTasks,
+        ]);
+    }
+
+    public function notifications(Request $request): Response
+    {
+        $user = $request->user();
+        
+        return Inertia::render('Notifications', [
+            'notifications' => $user->notifications,
+        ]);
+    }
+
+    public function markNotificationAsRead(Request $request, $id)
+    {
+        $notification = $request->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+        
+        return back();
+    }
 }
