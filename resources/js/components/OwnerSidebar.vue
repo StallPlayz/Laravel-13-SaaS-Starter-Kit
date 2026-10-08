@@ -26,6 +26,9 @@ const page = usePage();
 
 const mainNavItems = computed<NavItem[]>(() => {
     const workspace = page.props.auth.activeWorkspace;
+    const dashboardUrl = workspace
+        ? `/workspaces/${workspace.slug}/dashboard`
+        : '/dashboard';
     const settingsUrl = workspace
         ? `/workspaces/${workspace.slug}/settings`
         : '/dashboard';
@@ -43,7 +46,7 @@ const mainNavItems = computed<NavItem[]>(() => {
         : '/dashboard';
 
     return [
-        { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+        { title: 'Dashboard', href: dashboardUrl, icon: LayoutGrid },
         { title: 'Service Requests', href: requestsUrl, icon: Inbox },
         { title: 'Projects', href: projectsUrl, icon: Briefcase },
         { title: 'Invoices', href: invoicesUrl, icon: Receipt },

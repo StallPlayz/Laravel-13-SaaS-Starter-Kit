@@ -28,6 +28,9 @@ const currentRole = computed(() => page.props.auth.currentRole);
 
 const mainNavItems = computed<NavItem[]>(() => {
     const workspace = page.props.auth.activeWorkspace;
+    const dashboardUrl = workspace
+        ? `/workspaces/${workspace.slug}/dashboard`
+        : '/dashboard';
     const projectsUrl = workspace
         ? `/workspaces/${workspace.slug}/projects`
         : '/dashboard';
@@ -42,7 +45,7 @@ const mainNavItems = computed<NavItem[]>(() => {
         : '/dashboard';
 
     const items: NavItem[] = [
-        { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+        { title: 'Dashboard', href: dashboardUrl, icon: LayoutGrid },
     ];
 
     if (currentRole.value === 'client') {

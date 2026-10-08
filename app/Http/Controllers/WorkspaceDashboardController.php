@@ -17,7 +17,7 @@ class WorkspaceDashboardController extends Controller
         }
 
         $user = $request->user();
-        $role = $user->getWorkspaceRole($workspace);
+        $role = $user->workspaceRole($workspace);
 
         $data = [
             'workspace' => $workspace,
