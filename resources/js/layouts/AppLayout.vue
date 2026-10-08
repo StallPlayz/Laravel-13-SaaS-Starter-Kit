@@ -33,7 +33,10 @@ watch(
 const LayoutComponent = computed(() => {
     const user = page.props.auth?.user;
     const role = page.props.auth?.currentRole;
-    const isGlobalDashboard = page.url.startsWith('/dashboard') || page.url.startsWith('/settings');
+    const isGlobalDashboard = page.url.startsWith('/dashboard') || 
+                              page.url.startsWith('/settings') || 
+                              page.url.startsWith('/my-tasks') || 
+                              page.url.startsWith('/notifications');
 
     if (user?.platform_role === 'super_admin' && !role) {
         return PlatformAdminLayout;
