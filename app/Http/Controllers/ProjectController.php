@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\Workspace;
+use App\Notifications\TaskAssigned;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -166,6 +167,20 @@ class ProjectController extends Controller
 
         if ($request->has('collaborator_ids')) {
             $task->collaborators()->sync($request->collaborator_ids);
+        }
+
+        // Send notification to assignee
+        if ($task->assignee_id && $task->assignee_id !== $request->user()->id) {
+            $task->assignee->notify(new TaskAssigned($task));
+        }
+
+        // Send notification to collaborators
+        if ($request->has('collaborator_ids')) {
+            foreach ($task->collaborators as $collaborator) {
+                if ($collaborator->id !== $request->user()->id) {
+                    $collaborator->notify(new TaskAssigned($task));
+                }
+            }
         }
 
         return back()->with('success', 'Task created successfully.');

@@ -58,6 +58,9 @@ const markAsRead = (id: string) => {
                         <div class="flex-1">
                             <p class="text-sm font-medium">{{ notification.data.message || 'New Notification' }}</p>
                             <p class="text-xs text-muted-foreground mt-1">{{ new Date(notification.created_at).toLocaleString() }}</p>
+                            <div class="mt-2" v-if="notification.data.url">
+                                <a :href="notification.data.url" class="text-xs text-primary hover:underline font-medium">View Details &rarr;</a>
+                            </div>
                         </div>
                         <div v-if="!notification.read_at">
                             <Button variant="ghost" size="sm" @click="markAsRead(notification.id)">
