@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import {
     LayoutGrid,
-    Settings,
     LifeBuoy,
     Headset,
+    CheckSquare,
+    Inbox,
 } from '@lucide/vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -19,7 +20,8 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'Global Dashboard', href: '/dashboard', icon: LayoutGrid },
-    { title: 'Profile Settings', href: '/settings/profile', icon: Settings },
+    { title: 'My Tasks', href: '/dashboard#tasks', icon: CheckSquare },
+    { title: 'Pending Approvals', href: '/dashboard#approvals', icon: Inbox },
 ];
 
 const footerNavItems: NavItem[] = [
