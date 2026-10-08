@@ -91,7 +91,7 @@ const getStatusColor = (status: string) => {
             <div class="grid gap-8 md:grid-cols-3">
                 <!-- Unified Command Center -->
                 <div class="md:col-span-2 space-y-8">
-                    <div id="tasks" class="rounded-xl border bg-card text-card-foreground shadow-sm scroll-mt-24">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
                         <div class="p-6 border-b flex items-center gap-2">
                             <CheckSquare class="w-5 h-5 text-primary" />
                             <h3 class="font-semibold text-lg">My Tasks</h3>
@@ -121,7 +121,7 @@ const getStatusColor = (status: string) => {
                         </div>
                     </div>
 
-                    <div id="approvals" class="rounded-xl border bg-card text-card-foreground shadow-sm scroll-mt-24">
+                    <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
                         <div class="p-6 border-b flex items-center gap-2">
                             <Inbox class="w-5 h-5 text-amber-500" />
                             <h3 class="font-semibold text-lg">Pending Approvals</h3>

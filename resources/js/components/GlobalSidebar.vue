@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {
     LayoutGrid,
+    CheckSquare,
+    Bell,
     LifeBuoy,
     Headset,
-    CheckSquare,
-    Inbox,
 } from '@lucide/vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -20,8 +20,8 @@ import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     { title: 'Global Dashboard', href: '/dashboard', icon: LayoutGrid },
-    { title: 'My Tasks', href: '/dashboard#tasks', icon: CheckSquare },
-    { title: 'Pending Approvals', href: '/dashboard#approvals', icon: Inbox },
+    { title: 'My Tasks', href: '/my-tasks', icon: CheckSquare },
+    { title: 'Notifications', href: '/notifications', icon: Bell },
 ];
 
 const footerNavItems: NavItem[] = [
