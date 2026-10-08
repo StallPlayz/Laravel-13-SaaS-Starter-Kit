@@ -21,6 +21,7 @@ const activeWorkspace = computed(() => page.props.auth.activeWorkspace);
 const availableWorkspaces = computed(
     () => page.props.auth.availableWorkspaces || [],
 );
+const isGlobalDashboard = computed(() => page.url.startsWith('/dashboard') || page.url.startsWith('/settings'));
 
 const switchWorkspace = (workspaceId: number) => {
     router.post(
@@ -46,19 +47,21 @@ const switchWorkspace = (workspaceId: number) => {
                         <div
                             class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
                         >
-                            {{ activeWorkspace?.name?.charAt(0) || 'W' }}
+                            <Home v-if="isGlobalDashboard" class="size-4" />
+                            <span v-else>{{ activeWorkspace?.name?.charAt(0) || 'W' }}</span>
                         </div>
                         <div
                             class="grid flex-1 text-left text-sm leading-tight"
                         >
                             <span class="truncate font-semibold">{{
-                                activeWorkspace?.name || 'Select Workspace'
+                                isGlobalDashboard ? 'Global Dashboard' : (activeWorkspace?.name || 'Select Workspace')
                             }}</span>
-                            <span class="truncate text-xs">{{
+                            <span class="truncate text-xs" v-if="!isGlobalDashboard">{{
                                 activeWorkspace?.tier === 'pro'
                                     ? 'Pro Plan'
                                     : 'Free Plan'
                             }}</span>
+                            <span class="truncate text-xs" v-else>Personal Account</span>
                         </div>
                         <ChevronsUpDown class="ml-auto size-4" />
                     </SidebarMenuButton>
@@ -73,7 +76,7 @@ const switchWorkspace = (workspaceId: number) => {
                         Workspaces
                     </DropdownMenuLabel>
 
-                    <DropdownMenuItem as-child>
+                    <DropdownMenuItem as-child v-if="!isGlobalDashboard">
                         <Link
                             href="/dashboard"
                             class="flex w-full cursor-pointer items-center gap-2 p-2"
@@ -89,9 +92,9 @@ const switchWorkspace = (workspaceId: number) => {
                         </Link>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem as-child>
+                    <DropdownMenuItem as-child v-if="!isGlobalDashboard && activeWorkspace">
                         <Link
-                            :href="`/workspaces/${activeWorkspace?.slug}/settings`"
+                            :href="`/workspaces/${activeWorkspace.slug}/settings`"
                             class="flex w-full cursor-pointer items-center gap-2 p-2"
                         >
                             <div
@@ -105,7 +108,7 @@ const switchWorkspace = (workspaceId: number) => {
                         </Link>
                     </DropdownMenuItem>
 
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-if="!isGlobalDashboard" />
 
                     <DropdownMenuItem
                         v-for="workspace in availableWorkspaces"
