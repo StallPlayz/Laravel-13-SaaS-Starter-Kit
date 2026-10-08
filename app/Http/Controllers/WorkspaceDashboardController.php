@@ -55,7 +55,7 @@ class WorkspaceDashboardController extends Controller
                 }])
                 ->withCount('tasks as total_tasks_count')
                 ->get();
-                
+
             $data['pending_approvals'] = $workspace->tasks()
                 ->whereHas('project.users', function ($q) use ($user) {
                     $q->where('users.id', $user->id)->wherePivot('role', 'client');

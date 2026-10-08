@@ -68,6 +68,16 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Get the tasks where the user is a collaborator.
+     */
+    public function collaboratorTasks(): BelongsToMany
+    {
+        return $this->belongsToMany(Task::class, 'task_collaborators')
+            ->withPivot('status')
+            ->withTimestamps();
+    }
+
+    /**
      * Get the user's role in the given workspace.
      */
     public function workspaceRole(Workspace $workspace): ?string

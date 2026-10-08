@@ -50,7 +50,7 @@ class LoginResponse implements LoginResponseContract
         }
 
         $activeWorkspaceId = $request->session()->get('active_workspace_id');
-        
+
         if ($activeWorkspaceId) {
             $workspace = $user->workspaces()->find($activeWorkspaceId);
             if ($workspace) {

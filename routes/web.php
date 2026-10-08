@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SystemLogController as AdminLogController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\WorkspaceController as AdminWorkspaceController;
 use App\Http\Controllers\GeoController;
+use App\Http\Controllers\GlobalDashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OtpLoginController;
 use App\Http\Controllers\ProjectController;
@@ -45,14 +46,14 @@ Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $requ
 })->middleware(['auth', 'signed'])->name('verification.verify');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [GlobalDashboardController::class, 'index'])->name('dashboard');
     Route::post('/workspaces/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
 
     Route::get('/workspaces/create', [WorkspaceController::class, 'create'])->name('workspaces.create');
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
-    
+
     Route::get('/workspaces/{workspace:slug}/dashboard', [WorkspaceDashboardController::class, 'index'])->name('workspaces.dashboard');
-    
+
     Route::get('/workspaces/{workspace:slug}/settings', [WorkspaceController::class, 'settings'])->name('workspaces.settings');
     Route::get('/workspaces/{workspace:slug}/settings/appearance', [WorkspaceController::class, 'appearance'])->name('workspaces.settings.appearance');
     Route::put('/workspaces/{workspace:slug}', [WorkspaceController::class, 'update'])->name('workspaces.update');

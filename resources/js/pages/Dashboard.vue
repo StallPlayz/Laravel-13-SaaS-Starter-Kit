@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, usePage, router } from '@inertiajs/vue3';
-import { Building2, ArrowRight, CheckSquare, Inbox, CreditCard } from '@lucide/vue';
+import { Building2, ArrowRight, CheckSquare, Inbox, CreditCard, Clock, AlertCircle, Circle, CheckCircle2 } from '@lucide/vue';
 import { computed } from 'vue';
 import { dashboard } from '@/routes';
+
+defineProps<{
+    myTasks?: any[];
+    pendingApprovals?: any[];
+}>();
 
 defineOptions({
     layout: {
@@ -29,6 +34,24 @@ const switchWorkspace = (workspaceId: number) => {
             preserveState: false,
         },
     );
+};
+
+const getStatusIcon = (status: string) => {
+    switch (status) {
+        case 'done': return CheckCircle2;
+        case 'in_progress': return Clock;
+        case 'review': return AlertCircle;
+        default: return Circle;
+    }
+};
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'done': return 'text-emerald-500';
+        case 'in_progress': return 'text-blue-500';
+        case 'review': return 'text-amber-500';
+        default: return 'text-muted-foreground';
+    }
 };
 </script>
 
@@ -73,18 +96,55 @@ const switchWorkspace = (workspaceId: number) => {
                             <CheckSquare class="w-5 h-5 text-primary" />
                             <h3 class="font-semibold text-lg">My Tasks</h3>
                         </div>
-                        <div class="p-6 text-center text-sm text-muted-foreground">
-                            Global task aggregation will be implemented here.
+                        <div class="p-0">
+                            <div v-if="!myTasks || myTasks.length === 0" class="p-6 text-center text-sm text-muted-foreground">
+                                You don't have any active tasks across your workspaces.
+                            </div>
+                            <div v-else class="divide-y">
+                                <div v-for="task in myTasks" :key="task.id" class="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                                    <div class="flex items-center gap-4">
+                                        <component :is="getStatusIcon(task.status)" class="h-5 w-5" :class="getStatusColor(task.status)" />
+                                        <div>
+                                            <p class="font-medium">{{ task.title }}</p>
+                                            <div class="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                <span class="font-medium text-foreground">{{ task.project?.workspace?.name }}</span>
+                                                <span>&bull;</span>
+                                                <span>{{ task.project?.name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Link :href="`/workspaces/${task.project?.workspace?.slug}/projects/${task.project?.slug}/tasks`" class="text-sm text-primary hover:underline">
+                                        View Task
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="rounded-xl border bg-card text-card-foreground shadow-sm">
                         <div class="p-6 border-b flex items-center gap-2">
-                            <Inbox class="w-5 h-5 text-primary" />
+                            <Inbox class="w-5 h-5 text-amber-500" />
                             <h3 class="font-semibold text-lg">Pending Approvals</h3>
                         </div>
-                        <div class="p-6 text-center text-sm text-muted-foreground">
-                            Global approvals aggregation will be implemented here.
+                        <div class="p-0">
+                            <div v-if="!pendingApprovals || pendingApprovals.length === 0" class="p-6 text-center text-sm text-muted-foreground">
+                                No tasks require your approval right now.
+                            </div>
+                            <div v-else class="divide-y">
+                                <div v-for="task in pendingApprovals" :key="task.id" class="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                                    <div>
+                                        <p class="font-medium">{{ task.title }}</p>
+                                        <div class="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                            <span class="font-medium text-foreground">{{ task.project?.workspace?.name }}</span>
+                                            <span>&bull;</span>
+                                            <span>{{ task.project?.name }}</span>
+                                        </div>
+                                    </div>
+                                    <Link :href="`/workspaces/${task.project?.workspace?.slug}/projects/${task.project?.slug}/tasks`" class="text-sm text-primary hover:underline">
+                                        Review
+                                    </Link>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +157,7 @@ const switchWorkspace = (workspaceId: number) => {
                             Create New
                         </Link>
                     </div>
-                    
+
                     <div class="grid gap-4">
                         <button
                             v-for="workspace in availableWorkspaces"
