@@ -14,7 +14,7 @@ class GlobalDashboardController extends Controller
         
         // Fetch all tasks assigned to the user across all workspaces
         $myTasks = $user->tasks()
-            ->whereIn('status', ['todo', 'in_progress', 'review'])
+            ->whereIn('tasks.status', ['todo', 'in_progress', 'review'])
             ->with(['project.workspace'])
             ->latest()
             ->take(10)
@@ -22,7 +22,7 @@ class GlobalDashboardController extends Controller
 
         // Fetch all tasks where the user is a collaborator
         $collaboratorTasks = $user->collaboratorTasks()
-            ->whereIn('status', ['todo', 'in_progress', 'review'])
+            ->whereIn('tasks.status', ['todo', 'in_progress', 'review'])
             ->with(['project.workspace'])
             ->latest()
             ->take(10)

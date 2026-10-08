@@ -39,7 +39,7 @@ class WorkspaceDashboardController extends Controller
                               $q->where('users.id', $user->id);
                           });
                 })
-                ->whereIn('status', ['todo', 'in_progress', 'review'])
+                ->whereIn('tasks.status', ['todo', 'in_progress', 'review'])
                 ->with('project')
                 ->latest()
                 ->take(10)
