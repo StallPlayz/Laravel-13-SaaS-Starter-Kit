@@ -21,7 +21,12 @@ const activeWorkspace = computed(() => page.props.auth.activeWorkspace);
 const availableWorkspaces = computed(
     () => page.props.auth.availableWorkspaces || [],
 );
-const isGlobalDashboard = computed(() => page.url.startsWith('/dashboard') || page.url.startsWith('/settings'));
+const isGlobalDashboard = computed(() => 
+    page.url.startsWith('/dashboard') || 
+    page.url.startsWith('/settings') || 
+    page.url.startsWith('/my-tasks') || 
+    page.url.startsWith('/notifications')
+);
 
 const switchWorkspace = (workspaceId: number) => {
     router.post(
