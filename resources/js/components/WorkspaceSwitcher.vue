@@ -123,7 +123,7 @@ const switchWorkspace = (workspaceId: number) => {
                         </div>
                         {{ workspace.name }}
                         <Check
-                            v-if="workspace.id === activeWorkspace?.id"
+                            v-if="!isGlobalDashboard && workspace.id === activeWorkspace?.id"
                             class="ml-auto size-4"
                         />
                     </DropdownMenuItem>
