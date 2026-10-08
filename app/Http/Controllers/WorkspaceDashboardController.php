@@ -58,7 +58,7 @@ class WorkspaceDashboardController extends Controller
 
             $data['pending_approvals'] = $workspace->tasks()
                 ->whereHas('project.users', function ($q) use ($user) {
-                    $q->where('users.id', $user->id)->wherePivot('role', 'client');
+                    $q->where('users.id', $user->id);
                 })
                 ->where('requires_approval', true)
                 ->where('approval_status', 'pending')

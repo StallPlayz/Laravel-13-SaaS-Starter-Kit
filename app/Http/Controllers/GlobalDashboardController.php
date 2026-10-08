@@ -33,7 +33,7 @@ class GlobalDashboardController extends Controller
 
         // Fetch pending approvals for projects where the user is a client
         $pendingApprovals = \App\Models\Task::whereHas('project.users', function ($q) use ($user) {
-                $q->where('users.id', $user->id)->wherePivot('role', 'client');
+                $q->where('users.id', $user->id);
             })
             ->where('requires_approval', true)
             ->where('approval_status', 'pending')
