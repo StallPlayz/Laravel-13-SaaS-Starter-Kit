@@ -45,3 +45,6 @@ class TaskAssigned extends Notification implements ShouldQueue
             'workspace_id' => $this->task->project->workspace_id,
             'message' => "You have been assigned to a new task: {$this->task->title}",
             'url' => "/workspaces/{$this->task->project->workspace->slug}/projects/{$this->task->project->slug}/tasks",
+        ];
+    }
+}
